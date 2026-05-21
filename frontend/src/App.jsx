@@ -1,4 +1,4 @@
-// src/App.jsx — Updated with new routes
+// src/App.jsx
 import { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
@@ -19,6 +19,7 @@ import ProfilePage      from './pages/ProfilePage';
 import HackathonModePage from './pages/HackathonModePage';
 import WorkspacePage    from './pages/WorkspacePage';
 import CreateTeamPage   from './pages/CreateTeamPage';
+import AdminDashboardPage from './pages/AdminDashboardPage';
 import AppLayout        from './components/layout/AppLayout';
 
 const PrivateRoute = ({ children }) => {
@@ -62,8 +63,10 @@ export default function App() {
         <Route path="/"        element={<LandingPage />} />
         <Route path="/login"   element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
+        
         <Route path="/app" element={<PrivateRoute><AppLayout /></PrivateRoute>}>
           <Route index                              element={<DashboardPage />} />
+          <Route path="admin"                      element={<AdminDashboardPage />} />
           <Route path="profile"                    element={<ProfilePage />} />
           <Route path="create-team"                element={<CreateTeamPage />} />
           <Route path="teams/:id"                  element={<TeamPage />} />
@@ -75,6 +78,7 @@ export default function App() {
           <Route path="teams/:id/hackathon"        element={<HackathonModePage />} />
           <Route path="teams/:id/workspace"        element={<WorkspacePage />} />
         </Route>
+
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </BrowserRouter>

@@ -26,6 +26,8 @@ export const authAPI = {
   register: (d) => api.post('/auth/register', d),
   login:    (d) => api.post('/auth/login', d),
   me:       ()  => api.get('/auth/me'),
+  myTasks:  ()  => api.get('/auth/my-tasks'),
+  auditLogs: () => api.get('/auth/audit-logs'),
   logout:   ()  => api.post('/auth/logout'),
   update:   (d) => api.put('/auth/profile', d),
 };
@@ -83,4 +85,18 @@ export const milestonesAPI = {
   getAll:   (tid)    => api.get(`/teams/${tid}/milestones`),
   create:   (tid, d) => api.post(`/teams/${tid}/milestones`, d),
   toggle:   (tid, id) => api.patch(`/teams/${tid}/milestones/${id}/toggle`),
+};
+
+export const adminAPI = {
+  getUsers: () => api.get('/admin/users'),
+  updateRole: (id, role) => api.put(`/admin/users/${id}/role`, { role }),
+  deleteUser: (id) => api.delete(`/admin/users/${id}`),
+  getTeams: () => api.get('/admin/teams'),
+  deleteTeam: (id) => api.delete(`/admin/teams/${id}`),
+  getTelemetry: () => api.get('/admin/telemetry'),
+  getThreats: () => api.get('/admin/threats'),
+  getDatabaseStats: () => api.get('/admin/database'),
+  getSettings: () => api.get('/admin/settings'),
+  updateSetting: (key, value) => api.put('/admin/settings', { key, value }),
+  broadcast: (message, severity) => api.post('/admin/broadcast', { message, severity }),
 };

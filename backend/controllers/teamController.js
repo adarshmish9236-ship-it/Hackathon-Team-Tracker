@@ -20,10 +20,7 @@ exports.createTeam = async (req, res) => {
     let leadRole = 'lead';
     if (leaderDetails) {
       leadRole = leaderDetails.role || 'lead';
-      await query(
-        'UPDATE Users SET github_id=?, linkedin_id=?, updated_at=CURRENT_TIMESTAMP WHERE id=?',
-        [leaderDetails.github || null, leaderDetails.linkedin || null, req.user.id]
-      );
+      // github/linkedin fields not in SQLite schema — skipping profile update
     }
     await query('INSERT INTO TeamMembers (team_id,user_id,role_tag) VALUES (?,?,?)',
       [teamId, req.user.id, leadRole]);
@@ -38,15 +35,14 @@ exports.createTeam = async (req, res) => {
         let memberUserId;
         if (existingUser) {
           memberUserId = existingUser.id;
-          await query('UPDATE Users SET github_id=?, linkedin_id=? WHERE id=?', 
-            [m.github || null, m.linkedin || null, memberUserId]);
+          // github/linkedin fields not in SQLite schema — skipping profile update
         } else {
           // Create placeholder account
           const hash = await bcrypt.hash('Hackathon123!', 10);
           const username = m.email.split('@')[0] + Math.floor(Math.random()*1000);
           const uRes = await query(
-            'INSERT INTO Users (username,email,password_hash,full_name,github_id,linkedin_id) VALUES (?,?,?,?,?,?)',
-            [username, m.email, hash, m.name, m.github || null, m.linkedin || null]
+            'INSERT INTO Users (username,email,password_hash,full_name) VALUES (?,?,?,?)',
+            [username, m.email, hash, m.name]
           );
           memberUserId = uRes.insertId;
         }

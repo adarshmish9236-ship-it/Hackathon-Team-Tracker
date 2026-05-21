@@ -34,6 +34,7 @@ app.use('/api/teams/:team_id/chat',       require('./routes/chat'));
 app.use('/api/teams/:team_id/polls',      require('./routes/polls'));
 app.use('/api/teams/:team_id/milestones', require('./routes/milestones'));
 app.use('/api/analytics', require('./routes/analytics'));
+app.use('/api/admin',     require('./routes/admin'));
 
 app.get('/api/health', (req, res) => res.json({ status: 'ok', time: new Date() }));
 

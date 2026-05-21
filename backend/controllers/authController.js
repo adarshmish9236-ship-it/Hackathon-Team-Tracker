@@ -82,3 +82,47 @@ exports.updateProfile = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
+exports.getMyTasks = async (req, res) => {
+  try {
+    const tasks = await query(
+      `SELECT t.*, teams.name as team_name 
+       FROM Tasks t 
+       JOIN Teams teams ON t.team_id = teams.id
+       WHERE t.assigned_to=? AND t.status != 'done'
+       ORDER BY CASE t.status
+         WHEN 'blocked' THEN 1
+         WHEN 'in_progress' THEN 2
+         WHEN 'review' THEN 3
+         WHEN 'todo' THEN 4
+         ELSE 5
+       END, t.due_date ASC`,
+      [req.user.id]
+    );
+    res.json(tasks);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+exports.getAuditLogs = async (req, res) => {
+  try {
+    // Only allow admins to view audit logs
+    const [user] = await query('SELECT role FROM Users WHERE id=?', [req.user.id]);
+    if (!user || user.role !== 'admin') {
+      return res.status(403).json({ error: 'Access denied. Admin role required.' });
+    }
+    const logs = await query(
+      `SELECT a.*, u.full_name, u.username, u.avatar_url, t.name as team_name
+       FROM ActivityLogs a
+       JOIN Users u ON a.user_id = u.id
+       LEFT JOIN Teams t ON a.team_id = t.id
+       ORDER BY a.created_at DESC LIMIT 30`
+    );
+    res.json(logs);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+
