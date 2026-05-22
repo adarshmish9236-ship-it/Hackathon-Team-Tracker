@@ -262,6 +262,7 @@ export default function AppLayout() {
 
   const navLinks = [
     { icon: LayoutDashboard, label: 'Dashboard',      path: '/app',                   group: 'main' },
+    { icon: Users,           label: 'My Team',        path: currentTeam ? `/app/teams/${currentTeam.id}` : '#', group: 'main', reqTeam: true },
     ...(user?.role === 'admin' ? [{ icon: Shield, label: 'Admin',  path: '/app/admin', group: 'main' }] : []),
     { icon: Kanban,          label: 'Kanban',         path: teamPath('kanban'),        group: 'team', reqTeam: true },
     { icon: MessageCircle,   label: 'Chat',           path: teamPath('chat'),          group: 'team', badge: unreadCount > 0 ? unreadCount : null, reqTeam: true },

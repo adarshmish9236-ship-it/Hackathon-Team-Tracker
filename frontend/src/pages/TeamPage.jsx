@@ -73,6 +73,31 @@ export default function TeamPage() {
 
   return (
     <div>
+      {/* Back Button */}
+      <div style={{ marginBottom: 16 }}>
+        <button
+          onClick={() => navigate('/app')}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 6,
+            background: 'transparent',
+            border: 'none',
+            color: 'var(--text-muted)',
+            cursor: 'pointer',
+            fontSize: 13,
+            fontWeight: 600,
+            padding: '6px 12px',
+            borderRadius: 8,
+            transition: 'all 0.2s',
+          }}
+          onMouseEnter={e => { e.currentTarget.style.color = 'var(--indigo-light)'; e.currentTarget.style.background = 'rgba(99,102,241,0.08)'; }}
+          onMouseLeave={e => { e.currentTarget.style.color = 'var(--text-muted)'; e.currentTarget.style.background = 'transparent'; }}
+        >
+          &larr; Back to Dashboard
+        </button>
+      </div>
+
       {/* Team Header */}
       <motion.div initial={{ opacity:0,y:20 }} animate={{ opacity:1,y:0 }}
         className="glass-card" style={{ padding:28,marginBottom:24,background:'linear-gradient(135deg,rgba(79,142,247,0.08),rgba(168,85,247,0.08))' }}>

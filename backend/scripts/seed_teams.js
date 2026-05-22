@@ -23,13 +23,13 @@ async function seed() {
     console.log('🧹 Cleaning existing teams and team members...');
     await run('DELETE FROM TeamMembers');
     await run('DELETE FROM Teams');
-    
+
     console.log('Starting team seeding...');
-    
+
     // Fetch existing users instead of recreating them
     const users = await query('SELECT id FROM Users ORDER BY id LIMIT 100');
     const userIds = users.map(u => u.id);
-    
+
     if (userIds.length < 100) {
       console.log(`⚠️ Warning: Found ${userIds.length} users in database (expected 100).`);
       if (userIds.length < 25) {
@@ -60,7 +60,7 @@ async function seed() {
       const inviteCode = Math.random().toString(36).substring(2, 10).toUpperCase();
       const hackName = hackathonThemes[i % hackathonThemes.length];
       const deadline = i % 3 === 0 ? '2026-10-15 00:00:00' : i % 3 === 1 ? '2026-09-30 00:00:00' : '2026-09-10 00:00:00';
-      
+
       const result = await run(
         'INSERT INTO Teams (name, description, owner_id, invite_code, hackathon_name, deadline, status) VALUES (?, ?, ?, ?, ?, ?, ?)',
         [
@@ -73,9 +73,9 @@ async function seed() {
           i % 3 === 2 ? 'completed' : 'active'
         ]
       );
-      
+
       const teamId = result.lastID;
-      
+
       // Add owner as a team member with 'lead' tag
       await run(
         'INSERT INTO TeamMembers (team_id, user_id, role_tag) VALUES (?, ?, ?)',
@@ -89,7 +89,7 @@ async function seed() {
           const memberId = userIds[memberIndex];
           const roles = ['frontend', 'backend', 'designer', 'debugger', 'fullstack'];
           const roleTag = roles[Math.floor(Math.random() * roles.length)];
-          
+
           await run(
             'INSERT INTO TeamMembers (team_id, user_id, role_tag) VALUES (?, ?, ?)',
             [teamId, memberId, roleTag]
