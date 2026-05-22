@@ -4,7 +4,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { teamAPI, analyticsAPI } from '../api/axios';
 import { useStore } from '../store/useStore';
-import { Kanban, MessageCircle, BarChart3, Brain, Swords, Copy, Check, Users, Crown } from 'lucide-react';
+import { Kanban, MessageCircle, BarChart3, TrendingUp, Swords, Copy, Check, Users, Crown } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export default function TeamPage() {
@@ -41,7 +41,7 @@ export default function TeamPage() {
     { icon:Kanban,       label:'Kanban Board',  sub:'Manage tasks',     color:'#4f8ef7', path:`/app/teams/${teamId}/kanban` },
     { icon:MessageCircle,label:'Team Chat',     sub:'Real-time chat',   color:'#a855f7', path:`/app/teams/${teamId}/chat` },
     { icon:BarChart3,    label:'Analytics',     sub:'Charts & insights', color:'#06b6d4', path:`/app/teams/${teamId}/analytics` },
-    { icon:Brain,        label:'AI Insights',   sub:'Smart predictions', color:'#10b981', path:`/app/teams/${teamId}/insights` },
+    { icon:TrendingUp,   label:'Insights',      sub:'Sprint and team insights', color:'#10b981', path:`/app/teams/${teamId}/insights` },
     { icon:Swords,       label:'War Room',      sub:'Live dashboard',    color:'#f59e0b', path:`/app/teams/${teamId}/warroom` },
     { icon:Users,        label:'Workspace',     sub:'Shared documents',  color:'#ec4899', path:`/app/teams/${teamId}/workspace` },
   ];

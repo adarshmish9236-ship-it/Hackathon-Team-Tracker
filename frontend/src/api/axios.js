@@ -77,8 +77,8 @@ export const sosAPI = {
 };
 
 export const notifAPI = {
-  getAll:   () => api.get('/teams/1/polls/notifications'),
-  markRead: () => api.post('/teams/1/polls/notifications/read'),
+  getAll:   () => api.get('/auth/notifications'),
+  markRead: () => api.post('/auth/notifications/read'),
 };
 
 export const milestonesAPI = {
@@ -99,4 +99,12 @@ export const adminAPI = {
   getSettings: () => api.get('/admin/settings'),
   updateSetting: (key, value) => api.put('/admin/settings', { key, value }),
   broadcast: (message, severity) => api.post('/admin/broadcast', { message, severity }),
+  notify: (data) => api.post('/admin/notify', data),
+  getHackathons: () => api.get('/admin/hackathons'),
+  createHackathon: (data) => api.post('/admin/hackathons', data),
+  updateHackathon: (id, data) => api.put(`/admin/hackathons/${id}`, data),
+  deleteHackathon: (id) => api.delete(`/admin/hackathons/${id}`),
+  getSubmissions: () => api.get('/admin/submissions'),
+  assignJudge: (id, judge_assigned) => api.post(`/admin/submissions/${id}/assign-judge`, { judge_assigned }),
+  getActivities: (params) => api.get('/admin/activities', { params }),
 };

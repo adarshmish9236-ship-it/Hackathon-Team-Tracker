@@ -22,7 +22,7 @@ export default function LoginPage() {
       setToken(r.data.token);
       setUser(r.data.user);
       toast.success(`Welcome back, ${r.data.user.full_name}! 🚀`);
-      navigate('/app');
+      navigate(r.data.user.role === 'admin' ? '/app/admin' : '/app');
     } catch (err) {
       toast.error(err.response?.data?.error || 'Login failed');
     } finally { setLoading(false); }

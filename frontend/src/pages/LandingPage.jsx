@@ -2,7 +2,7 @@
 import { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Zap, Users, Kanban, BarChart3, Shield, Brain, Swords, ChevronRight, ChevronDown, Activity } from 'lucide-react';
+import { Zap, Users, Kanban, BarChart3, Shield, TrendingUp, Swords, ChevronRight, ChevronDown, Activity } from 'lucide-react';
 
 const STATS = [
   { value: '10K+', label: 'Teams Tracked' },
@@ -13,7 +13,7 @@ const STATS = [
 
 const FEATURES = [
   { icon: Swords,    title: 'War Room',     desc: 'Live hackathon dashboard with timer, stress meter, and real-time completion tracking.', color: 'var(--indigo)',  grad: 'linear-gradient(135deg,rgba(99,102,241,0.25),rgba(99,102,241,0.05))' },
-  { icon: Brain,     title: 'AI Insights',  desc: 'Productivity scores, burnout detection, and smart role allocation powered by algorithms.', color: 'var(--violet)', grad: 'linear-gradient(135deg,rgba(139,92,246,0.25),rgba(139,92,246,0.05))' },
+  { icon: TrendingUp, title: 'Team Insights', desc: 'Productivity scores, burnout detection, and smart role recommendations based on team activity.', color: 'var(--violet)', grad: 'linear-gradient(135deg,rgba(139,92,246,0.25),rgba(139,92,246,0.05))' },
   { icon: Kanban,    title: 'Kanban Board', desc: 'Drag-and-drop task management synced live across all team members instantly.', color: 'var(--cyan)',   grad: 'linear-gradient(135deg,rgba(6,182,212,0.25),rgba(6,182,212,0.05))' },
   { icon: Activity,  title: 'Team Pulse',   desc: 'See who is online, what they\'re editing, live typing indicators and cursor tracking.', color: 'var(--emerald)', grad: 'linear-gradient(135deg,rgba(16,185,129,0.25),rgba(16,185,129,0.05))' },
   { icon: BarChart3, title: 'Analytics',    desc: 'GitHub-style heatmaps, contribution graphs, mood analytics, and performance trends.', color: 'var(--amber)',  grad: 'linear-gradient(135deg,rgba(245,158,11,0.25),rgba(245,158,11,0.05))' },
@@ -152,7 +152,7 @@ export default function LandingPage() {
             fontSize: 18, color: 'var(--text-secondary)',
             maxWidth: 600, margin: '0 auto 40px', lineHeight: 1.75,
           }}>
-            SyncSphere combines Kanban, real-time chat, AI analytics, war room dashboards, and gamification — built specifically for hackathon teams.
+            SyncSphere combines Kanban, real-time chat, productivity insights, war room dashboards, and gamification — built specifically for hackathon teams.
           </p>
 
           {/* CTA Row */}

@@ -10,5 +10,7 @@ router.get ('/my-tasks', auth, ctrl.getMyTasks);
 router.get ('/audit-logs', auth, ctrl.getAuditLogs);
 router.post('/logout',   auth, ctrl.logout);
 router.put ('/profile',  auth, ctrl.updateProfile);
+router.get ('/notifications', auth, ctrl.getNotifications);
+router.post('/notifications/read', auth, ctrl.markNotificationsRead);
 
 module.exports = router;

@@ -303,7 +303,7 @@ export default function WarRoomPage() {
           }
         </motion.div>
 
-        {/* AI Status */}
+        {/* Project Status */}
         <motion.div
           initial={{ opacity:0 }} animate={{ opacity:1 }} transition={{ delay:0.2 }}
           className="glass-hud hud-corner"
@@ -315,7 +315,7 @@ export default function WarRoomPage() {
             transition={{ repeat:Infinity, duration:2.5 }}
             style={{ position:'absolute', inset:0, borderRadius:'var(--r-xl)', border:`1px solid ${pct > 80 ? 'rgba(16,185,129,0.3)' : pct > 50 ? 'rgba(245,158,11,0.3)' : 'rgba(244,63,94,0.3)'}`, pointerEvents:'none' }}
           />
-          <div className="section-label" style={{ marginBottom:12 }}>🤖 AI STATUS</div>
+          <div className="section-label" style={{ marginBottom:12 }}>📋 PROJECT STATUS</div>
           <motion.div
             animate={{ scale:[1,1.08,1] }}
             transition={{ repeat:Infinity, duration:3 }}

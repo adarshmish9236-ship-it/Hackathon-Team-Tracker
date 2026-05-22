@@ -11,7 +11,7 @@ const SKILL_OPTIONS = ['React','Node.js','Python','MySQL','MongoDB','Docker','Fi
 const STATIC_BADGES = [
   { id: 1, badge_icon: '🏆', badge_name: 'Team Captain',  description: 'Led a team to victory', color: '#f59e0b' },
   { id: 2, badge_icon: '⚡', badge_name: 'Speed Coder',   description: 'Completed 10 tasks in a sprint', color: '#6366f1' },
-  { id: 3, badge_icon: '🧠', badge_name: 'ML Wizard',     description: 'AI Insights power user', color: '#8b5cf6' },
+  { id: 3, badge_icon: '📊', badge_name: 'Data Analyst',  description: 'Insights dashboard power user', color: '#8b5cf6' },
   { id: 4, badge_icon: '🎨', badge_name: 'Design Guru',   description: 'Figma master contributor', color: '#ec4899' },
 ];
 

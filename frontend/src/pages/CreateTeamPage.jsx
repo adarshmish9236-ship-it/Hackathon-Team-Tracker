@@ -17,7 +17,7 @@ const ROLES = [
   { val: 'backend',    label: '⚙️ Backend'    },
   { val: 'fullstack',  label: '🔥 Fullstack'  },
   { val: 'designer',   label: '✏️ Designer'   },
-  { val: 'ml',         label: '🤖 ML / AI'    },
+  { val: 'ml',         label: '🤖 Machine Learning' },
   { val: 'devops',     label: '🚀 DevOps'     },
   { val: 'presenter',  label: '🎤 Presenter'  },
   { val: 'member',     label: '👤 Member'     },
@@ -180,7 +180,7 @@ export default function CreateTeamPage() {
           </Field>
           <div style={grid2}>
             <Field label="Hackathon Name" icon={Target}>
-              <input className="input" value={form.hackathon_name} onChange={e => setForm({ ...form, hackathon_name: e.target.value })} placeholder="e.g. Global AI Hack 2025" />
+              <input className="input" value={form.hackathon_name} onChange={e => setForm({ ...form, hackathon_name: e.target.value })} placeholder="e.g. Global Hackathon 2025" />
             </Field>
             <Field label="Submission Deadline" icon={Target}>
               <input type="datetime-local" className="input" value={form.deadline} onChange={e => setForm({ ...form, deadline: e.target.value })} />

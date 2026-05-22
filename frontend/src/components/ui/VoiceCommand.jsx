@@ -11,7 +11,7 @@ const COMMANDS = [
   { pattern: /open kanban/i,              action: 'navigate', target: 'kanban' },
   { pattern: /open chat/i,                action: 'navigate', target: 'chat' },
   { pattern: /open analytics/i,           action: 'navigate', target: 'analytics' },
-  { pattern: /open (ai|insights)/i,       action: 'navigate', target: 'insights' },
+  { pattern: /open insights/i,            action: 'navigate', target: 'insights' },
   { pattern: /go (to )?dashboard/i,       action: 'navigate', target: 'dashboard' },
   { pattern: /hackathon mode/i,           action: 'hackathon' },
   { pattern: /send sos/i,                 action: 'sos' },

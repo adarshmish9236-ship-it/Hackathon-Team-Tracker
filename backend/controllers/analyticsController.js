@@ -67,10 +67,107 @@ async function updateTeamHealth(team_id) {
   return health;
 }
 
+// ── Helper: ensure team has high-fidelity dummy data ──────────────────────────
+async function ensureTeamDummyData(team_id) {
+  try {
+    const [taskCount] = await query('SELECT COUNT(*) as c FROM Tasks WHERE team_id = ?', [team_id]);
+    if (taskCount.c > 0) return; // Team already has tasks, no need to seed
+
+    console.log(`🌱 Auto-seeding premium dummy data for team ${team_id}...`);
+
+    const members = await query('SELECT user_id, role_tag FROM TeamMembers WHERE team_id = ?', [team_id]);
+    if (members.length === 0) return;
+
+    const leadUser = members.find(m => m.role_tag === 'lead') || members[0];
+    const leadUserId = leadUser.user_id;
+
+    // 1. Seed Tasks
+    const sampleTasks = [
+      { title: 'Setup Git Repo & CI/CD pipeline', desc: 'Initialize git repository, configure branching strategy, and setup GitHub Actions workflow for auto-deployment.', status: 'done', priority: 'high', role: 'backend', ageDays: 12, compDays: 10 },
+      { title: 'Design Figma Mockups & Wireframes', desc: 'Create high-fidelity mobile and desktop designs with glassmorphic aesthetics.', status: 'done', priority: 'critical', role: 'designer', ageDays: 11, compDays: 9 },
+      { title: 'Create Database schema & migrations', desc: 'Design ERD, configure SQLite relations, and write initial seed scripts.', status: 'done', priority: 'high', role: 'backend', ageDays: 10, compDays: 8 },
+      { title: 'Implement JWT Authentication & Session', desc: 'Secure backend routes with stateless JSON Web Tokens and refresh system.', status: 'done', priority: 'medium', role: 'backend', ageDays: 8, compDays: 6 },
+      { title: 'Develop Landing page & navigation layout', desc: 'Build reactive, premium hero sections and dynamic sidebar layouts.', status: 'done', priority: 'high', role: 'frontend', ageDays: 7, compDays: 5 },
+      { title: 'Build Team Collaboration Board (Kanban)', desc: 'Implement drag-and-drop workflow lanes matching task status changes.', status: 'in_progress', priority: 'critical', role: 'frontend', ageDays: 5 },
+      { title: 'Integrate Socket.io chat server', desc: 'Provide low-latency workspace chat channels and user typing indicators.', status: 'in_progress', priority: 'medium', role: 'frontend', ageDays: 4 },
+      { title: 'Write unit tests for Auth service', desc: 'Achieve 80% coverage on authentication controllers and routing pipelines.', status: 'todo', priority: 'low', role: 'debugger', ageDays: 3 },
+      { title: 'Optimize API response payload caching', desc: 'Eliminate duplicate SQL queries using simple Redis or memory caches.', status: 'blocked', priority: 'medium', role: 'debugger', ageDays: 2 },
+      { title: 'Prepare presentation slide deck', desc: 'Outline product architecture, value proposition, and live-demo scenarios.', status: 'todo', priority: 'high', role: 'lead', ageDays: 1 }
+    ];
+
+    for (const t of sampleTasks) {
+      const assigned = members.find(m => m.role_tag === t.role) || members[Math.floor(Math.random() * members.length)];
+      const assignedId = assigned.user_id;
+
+      const createdVal = `datetime('now', '-${t.ageDays} days')`;
+      const dueVal = `datetime('now', '+${14 - t.ageDays} days')`;
+      const compVal = t.compDays ? `datetime('now', '-${t.compDays} days')` : 'NULL';
+
+      await query(
+        `INSERT INTO Tasks (team_id, title, description, status, priority, assigned_to, created_by, due_date, completed_at, created_at, updated_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ${dueVal}, ${compVal}, ${createdVal}, ${createdVal})`,
+        [team_id, t.title, t.desc, t.status, t.priority, assignedId, leadUserId]
+      );
+    }
+
+    // 2. Seed Attendance
+    for (const m of members) {
+      for (let day = 1; day <= 5; day++) {
+        const checkIn = `datetime('now', '-${day} days', '-8 hours')`;
+        const checkOut = `datetime('now', '-${day} days')`;
+        const duration = 480; // 8 hours
+        await query(
+          `INSERT INTO Attendance (team_id, user_id, check_in, check_out, duration_mins)
+           VALUES (?, ?, ${checkIn}, ${checkOut}, ?)`,
+          [team_id, m.user_id, duration]
+        );
+      }
+    }
+
+    // 3. Seed Chat Messages
+    const sampleChats = [
+      { text: 'Hey team! I just pushed the main layout. Let me know what you think!', sentiment: 'positive', ageHours: 48 },
+      { text: 'Awesome work, the animations are so smooth!', sentiment: 'positive', ageHours: 46 },
+      { text: 'I am currently stuck on the database migration issue. Can anyone help?', sentiment: 'negative', ageHours: 44 },
+      { text: 'I can look at it with you in 10 minutes.', sentiment: 'neutral', ageHours: 43 },
+      { text: 'Auth is working perfectly now, tested with 50 concurrent sessions', sentiment: 'positive', ageHours: 24 },
+      { text: 'We need to focus on completing the Kanban board, deadline is approaching fast!', sentiment: 'neutral', ageHours: 20 },
+      { text: 'Is the API deployed? I am getting a CORS error.', sentiment: 'negative', ageHours: 18 },
+      { text: 'Yes, just updated the environment variables, try now.', sentiment: 'neutral', ageHours: 17 },
+      { text: 'Wow, that solved it! Thanks for the quick fix.', sentiment: 'positive', ageHours: 12 },
+      { text: 'Perfect. Presentation deck is also 80% ready.', sentiment: 'positive', ageHours: 2 }
+    ];
+
+    for (let idx = 0; idx < sampleChats.length; idx++) {
+      const c = sampleChats[idx];
+      const sender = members[idx % members.length];
+      const createdVal = `datetime('now', '-${c.ageHours} hours')`;
+      await query(
+        `INSERT INTO Chats (team_id, sender_id, message, sentiment, created_at)
+         VALUES (?, ?, ?, ?, ${createdVal})`,
+        [team_id, sender.user_id, c.text, c.sentiment]
+      );
+    }
+
+    // 4. Calculate Productivity for each member
+    for (const m of members) {
+      await calcProductivityInline(m.user_id, team_id);
+    }
+
+    // 5. Update Team Health
+    await updateTeamHealth(team_id);
+
+    console.log(`✅ Success: Premium dummy data populated for team ${team_id}`);
+  } catch (err) {
+    console.error(`❌ Error in ensureTeamDummyData for team ${team_id}:`, err.message);
+  }
+}
+
 // ── GET /analytics/:team_id ───────────────────────────────────────────────────
 exports.getTeamAnalytics = async (req, res) => {
   try {
     const { team_id } = req.params;
+    await ensureTeamDummyData(team_id);
     const [overview]    = await query('SELECT * FROM vw_team_analytics WHERE team_id=?', [team_id]);
     const productivity  = await query(
       `SELECT ps.*,u.full_name,u.username,u.avatar_url
@@ -145,6 +242,7 @@ exports.calcProductivity = async (req, res) => {
 exports.getAIInsights = async (req, res) => {
   try {
     const { team_id } = req.params;
+    await ensureTeamDummyData(team_id);
     const [ana] = await query('SELECT * FROM vw_team_analytics WHERE team_id=?', [team_id]);
     const members = await query(
       `SELECT u.id,u.full_name,u.xp_points,tm.role_tag,

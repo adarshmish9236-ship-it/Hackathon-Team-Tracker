@@ -1,6 +1,6 @@
 // src/App.jsx
 import { useEffect } from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { useStore } from './store/useStore';
 import { authAPI } from './api/axios';
@@ -19,16 +19,67 @@ import ProfilePage      from './pages/ProfilePage';
 import HackathonModePage from './pages/HackathonModePage';
 import WorkspacePage    from './pages/WorkspacePage';
 import CreateTeamPage   from './pages/CreateTeamPage';
-import AdminDashboardPage from './pages/AdminDashboardPage';
+import AdminLoginPage   from './pages/AdminLoginPage';
+import AdminDashboardOverview from './pages/admin/AdminDashboardOverview';
+import AdminTeamManagement from './pages/admin/AdminTeamManagement';
+import AdminParticipantManagement from './pages/admin/AdminParticipantManagement';
+import AdminHackathonManagement from './pages/admin/AdminHackathonManagement';
+import AdminTaskTracking from './pages/admin/AdminTaskTracking';
+import AdminActivityMonitoring from './pages/admin/AdminActivityMonitoring';
+import AdminSubmissions from './pages/admin/AdminSubmissions';
+import AdminAnnouncements from './pages/admin/AdminAnnouncements';
+import AdminModeration from './pages/admin/AdminModeration';
+import AdminSettings from './pages/admin/AdminSettings';
 import AppLayout        from './components/layout/AppLayout';
+import AdminLayout      from './components/layout/AdminLayout';
 
 const PrivateRoute = ({ children }) => {
-  const { token } = useStore();
-  return token ? children : <Navigate to="/login" replace />;
+  const { token, user } = useStore();
+  if (!token) return <Navigate to="/login" replace />;
+  if (!user) {
+    return (
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-primary)', background: 'var(--space-void)' }}>
+        <div style={{ textAlign: 'center', maxWidth: 420 }}>
+          <div style={{ fontSize: 32, fontWeight: 700, marginBottom: 12 }}>Loading mission control…</div>
+          <div style={{ color: 'var(--text-muted)', fontSize: 15 }}>Authenticating your session and preparing the admin dashboard.</div>
+        </div>
+      </div>
+    );
+  }
+  return children;
 };
 
+const AdminRoute = ({ children }) => {
+  const { token, user } = useStore();
+  if (!token) return <Navigate to="/login" replace />;
+  if (!user) {
+    return (
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-primary)', background: 'var(--space-void)' }}>
+        <div style={{ textAlign: 'center', maxWidth: 420 }}>
+          <div style={{ fontSize: 32, fontWeight: 700, marginBottom: 12 }}>Loading mission control…</div>
+          <div style={{ color: 'var(--text-muted)', fontSize: 15 }}>Authenticating your session and preparing the admin dashboard.</div>
+        </div>
+      </div>
+    );
+  }
+  if (user.role !== 'admin') {
+    return <Navigate to="/app" replace />;
+  }
+  return children;
+};
+
+function ScrollToTop() {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+
+  return null;
+}
+
 export default function App() {
-  const { theme, token, setUser, setToken } = useStore();
+  const { theme, token, user, setUser, setToken } = useStore();
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
@@ -41,10 +92,11 @@ export default function App() {
         setToken(null);
       });
     }
-  }, []);
+  }, [token, setToken, setUser]);
 
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <Toaster
         position="top-right"
         toastOptions={{
@@ -66,7 +118,6 @@ export default function App() {
         
         <Route path="/app" element={<PrivateRoute><AppLayout /></PrivateRoute>}>
           <Route index                              element={<DashboardPage />} />
-          <Route path="admin"                      element={<AdminDashboardPage />} />
           <Route path="profile"                    element={<ProfilePage />} />
           <Route path="create-team"                element={<CreateTeamPage />} />
           <Route path="teams/:id"                  element={<TeamPage />} />
@@ -77,6 +128,20 @@ export default function App() {
           <Route path="teams/:id/warroom"          element={<WarRoomPage />} />
           <Route path="teams/:id/hackathon"        element={<HackathonModePage />} />
           <Route path="teams/:id/workspace"        element={<WorkspacePage />} />
+        </Route>
+
+        <Route path="/admin-secret-login" element={<AdminLoginPage />} />
+        <Route path="/app/admin" element={<AdminRoute><AdminLayout /></AdminRoute>}>
+          <Route index element={<AdminDashboardOverview />} />
+          <Route path="teams" element={<AdminTeamManagement />} />
+          <Route path="participants" element={<AdminParticipantManagement />} />
+          <Route path="hackathons" element={<AdminHackathonManagement />} />
+          <Route path="tasks" element={<AdminTaskTracking />} />
+          <Route path="activity" element={<AdminActivityMonitoring />} />
+          <Route path="submissions" element={<AdminSubmissions />} />
+          <Route path="announcements" element={<AdminAnnouncements />} />
+          <Route path="moderation" element={<AdminModeration />} />
+          <Route path="settings" element={<AdminSettings />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/" />} />

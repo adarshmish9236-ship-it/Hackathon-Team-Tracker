@@ -26,5 +26,19 @@ router.put('/settings', ctrl.updateSetting);
 
 // Broadcast
 router.post('/broadcast', ctrl.broadcast);
+router.post('/notify', ctrl.notify);
+
+// Hackathons CRUD
+router.get('/hackathons', ctrl.getAllHackathons);
+router.post('/hackathons', ctrl.createHackathon);
+router.put('/hackathons/:id', ctrl.updateHackathon);
+router.delete('/hackathons/:id', ctrl.deleteHackathon);
+
+// Submissions & Evaluation
+router.get('/submissions', ctrl.getAllSubmissions);
+router.post('/submissions/:id/assign-judge', ctrl.assignJudge);
+
+// Activity Monitoring
+router.get('/activities', ctrl.getAllActivities);
 
 module.exports = router;

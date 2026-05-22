@@ -41,18 +41,22 @@ DBMS/
 │   │       ├── LoginPage.jsx
 │   │       ├── RegisterPage.jsx
 │   │       ├── DashboardPage.jsx
+│   │       ├── AdminDashboardPage.jsx ← Admin command center
 │   │       ├── TeamPage.jsx
 │   │       ├── KanbanPage.jsx       ← Drag-and-drop
 │   │       ├── ChatPage.jsx         ← Real-time Socket.IO
 │   │       ├── AnalyticsPage.jsx    ← Recharts
 │   │       ├── AIInsightsPage.jsx   ← AI predictions
 │   │       ├── WarRoomPage.jsx      ← Live command center
+│   │       ├── HackathonModePage.jsx
+│   │       ├── WorkspacePage.jsx
+│   │       ├── CreateTeamPage.jsx
 │   │       └── ProfilePage.jsx
 │   └── package.json
 │
 ├── backend/
 │   ├── server.js           # Express + Socket.IO server
-│   ├── routes/             # Auth, Teams, Tasks, Chat, Analytics, Polls
+│   ├── routes/             # Auth, Teams, Tasks, Chat, Analytics, Polls, Admin
 │   ├── controllers/        # Business logic
 │   ├── middleware/         # JWT auth middleware
 │   ├── utils/db.js         # MySQL2 connection pool
@@ -103,7 +107,8 @@ DBMS/
 ### Core Platform
 - 🔐 JWT authentication with bcrypt password hashing
 - 👥 Team creation with unique 8-char invite codes
-- 📋 Drag-and-drop Kanban board (5 columns, real-time sync)
+- �️ Admin command center with user/team governance, telemetry, threats, and broadcast tools
+- �📋 Drag-and-drop Kanban board (5 columns, real-time sync)
 - 💬 Real-time team chat with typing indicators, reactions, replies
 - 📊 Analytics dashboard with 6+ chart types (Recharts)
 
@@ -172,6 +177,8 @@ http://localhost:5173
 **Demo Credentials:**
 - Email: `alice@syncsphere.io`
 - Password: `password123`
+- Admin dashboard: `/app/admin`
+- Seeded sample teams: `Nebula Coders`, `Phoenix Squad`
 
 ---
 
@@ -214,7 +221,17 @@ POST /api/analytics/:id/user/:uid/calc  Recalculate productivity
 
 POST /api/teams/:id/polls      Create poll
 POST /api/teams/:id/polls/:pid/vote  Vote on poll
-```
+GET  /api/admin/users             Get all users (admin only)
+PUT  /api/admin/users/:id/role     Update user role (admin only)
+DELETE /api/admin/users/:id        Delete user (admin only)
+GET  /api/admin/teams              Get all teams (admin only)
+DELETE /api/admin/teams/:id        Delete team (admin only)
+GET  /api/admin/telemetry          Get admin telemetry data
+GET  /api/admin/threats            Get recent threat log entries
+GET  /api/admin/database           Get database statistics
+GET  /api/admin/settings           Get admin settings
+PUT  /api/admin/settings           Update admin settings
+POST /api/admin/broadcast         Send broadcast message```
 
 ---
 

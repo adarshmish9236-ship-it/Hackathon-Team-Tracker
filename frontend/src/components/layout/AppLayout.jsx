@@ -4,10 +4,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useStore } from '../../store/useStore';
 import { useSocket } from '../../hooks/useSocket';
 import { useEffect, useState, useRef } from 'react';
-import { teamAPI } from '../../api/axios';
+import { teamAPI, notifAPI } from '../../api/axios';
 import {
   LayoutDashboard, Kanban, MessageCircle, BarChart3,
-  Brain, Swords, User, Sun, Moon, Menu, X, Zap,
+  TrendingUp, Swords, User, Sun, Moon, Menu, X, Zap,
   ChevronDown, LogOut, Plus, Rocket, Shield, Target,
   Command, Search, ArrowRight, ChevronRight, Activity,
   Bell, Settings, Hash
@@ -36,7 +36,7 @@ function CommandPalette({ open, onClose, currentTeam, navigate }) {
     { icon: Kanban,          label: 'Kanban Board',   desc: 'Drag-and-drop tasks',   path: teamPath('kanban'),        color: '#06b6d4' },
     { icon: MessageCircle,   label: 'Team Chat',      desc: 'Real-time messaging',   path: teamPath('chat'),          color: '#8b5cf6' },
     { icon: BarChart3,       label: 'Analytics',      desc: 'Performance metrics',   path: teamPath('analytics'),     color: '#f59e0b' },
-    { icon: Brain,           label: 'AI Command',     desc: 'AI insights & burnout', path: teamPath('insights'),      color: '#10b981' },
+    { icon: TrendingUp,       label: 'Insights',       desc: 'Team performance and workload metrics', path: teamPath('insights'), color: '#10b981' },
     { icon: Swords,          label: 'War Room',       desc: 'Mission control',       path: teamPath('warroom'),       color: '#f43f5e' },
     { icon: Rocket,          label: 'Hackathon Mode', desc: 'Sprint milestones',     path: teamPath('hackathon'),     color: '#f97316' },
     { icon: Plus,            label: 'Create Team',    desc: 'Start a new team',      path: '/app/create-team',        color: '#6366f1' },
@@ -177,8 +177,19 @@ export default function AppLayout() {
   const location  = useLocation();
   const socket    = useSocket();
   const [teamDropdown, setTeamDropdown] = useState(false);
+  const [notifDropdown, setNotifDropdown] = useState(false);
+  const [sysNotifs, setSysNotifs] = useState([]);
+  const [sysUnread, setSysUnread] = useState(0);
   const [cmdOpen, setCmdOpen] = useState(false);
   const dropRef = useRef(null);
+  const notifRef = useRef(null);
+  const mainRef = useRef(null);
+
+  useEffect(() => {
+    if (mainRef.current) {
+      mainRef.current.scrollTop = 0;
+    }
+  }, [location.pathname]);
 
   // Cmd+K shortcut
   useEffect(() => {
@@ -192,11 +203,25 @@ export default function AppLayout() {
     return () => window.removeEventListener('keydown', handler);
   }, []);
 
+  const fetchNotifs = () => {
+    notifAPI.getAll().then(r => {
+      setSysNotifs(r.data.notifications);
+      setSysUnread(r.data.unread_count);
+    }).catch(()=>{});
+  };
+
+  useEffect(() => {
+    fetchNotifs();
+  }, []);
+
   // Close dropdown on outside click
   useEffect(() => {
     const handler = (e) => {
       if (dropRef.current && !dropRef.current.contains(e.target)) {
         setTeamDropdown(false);
+      }
+      if (notifRef.current && !notifRef.current.contains(e.target)) {
+        setNotifDropdown(false);
       }
     };
     document.addEventListener('mousedown', handler);
@@ -219,6 +244,7 @@ export default function AppLayout() {
     });
     socket.on('new-message', () => {
       if (!location.pathname.includes('/chat')) setUnreadCount(c => c + 1);
+      fetchNotifs();
     });
     socket.on('task-updated', (data) => {
       if (data.xpAwarded) triggerXPBurst(data.xpAwarded);
@@ -240,7 +266,7 @@ export default function AppLayout() {
     { icon: Kanban,          label: 'Kanban',         path: teamPath('kanban'),        group: 'team', reqTeam: true },
     { icon: MessageCircle,   label: 'Chat',           path: teamPath('chat'),          group: 'team', badge: unreadCount > 0 ? unreadCount : null, reqTeam: true },
     { icon: BarChart3,       label: 'Analytics',      path: teamPath('analytics'),     group: 'team', reqTeam: true },
-    { icon: Brain,           label: 'AI Command',     path: teamPath('insights'),      group: 'team', reqTeam: true },
+    { icon: TrendingUp,       label: 'Insights',       path: teamPath('insights'),      group: 'team', reqTeam: true },
     { icon: Swords,          label: 'War Room',       path: teamPath('warroom'),       group: 'team', reqTeam: true },
     { icon: Rocket,          label: 'Hackathon',      path: teamPath('hackathon'),     group: 'special', special: true, reqTeam: true },
   ];
@@ -664,6 +690,48 @@ export default function AppLayout() {
               }}>⌘K</kbd>
             </button>
 
+            {/* Notifications */}
+            <div ref={notifRef} style={{ position: 'relative' }}>
+              <button
+                onClick={() => {
+                  setNotifDropdown(!notifDropdown);
+                  if (!notifDropdown && sysUnread > 0) {
+                    notifAPI.markRead().then(() => setSysUnread(0));
+                  }
+                }}
+                className="btn-icon"
+                style={{ width: 32, height: 32, position: 'relative' }}
+              >
+                <Bell size={14} />
+                {sysUnread > 0 && (
+                  <div style={{ position: 'absolute', top: 6, right: 6, width: 8, height: 8, background: '#ef4444', borderRadius: '50%', border: '2px solid rgba(5,8,15,0.85)' }} />
+                )}
+              </button>
+              
+              <AnimatePresence>
+                {notifDropdown && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                    style={{ position: 'absolute', top: 40, right: 0, width: 320, background: '#121212', border: '1px solid #2a2a2a', borderRadius: 12, padding: 16, boxShadow: '0 10px 40px rgba(0,0,0,0.5)', zIndex: 100 }}
+                  >
+                    <h3 style={{ fontSize: 14, fontWeight: 600, color: '#fff', margin: '0 0 12px 0' }}>Notifications</h3>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 12, maxHeight: 300, overflowY: 'auto' }}>
+                      {sysNotifs.length === 0 ? (
+                         <div style={{ color: '#888', fontSize: 13, textAlign: 'center', padding: '20px 0' }}>All caught up!</div>
+                      ) : sysNotifs.map(n => (
+                        <div key={n.id} style={{ padding: 12, background: n.is_read ? 'transparent' : 'rgba(59,130,246,0.1)', borderRadius: 8, border: '1px solid #2a2a2a' }}>
+                          <div style={{ fontSize: 13, fontWeight: 600, color: '#fff', marginBottom: 4 }}>{n.title}</div>
+                          <div style={{ fontSize: 12, color: '#aaa' }}>{n.body}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
             {/* Hackathon Mode */}
             <motion.button
               whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
@@ -716,7 +784,7 @@ export default function AppLayout() {
         </header>
 
         {/* Page Content */}
-        <main style={{
+        <main ref={mainRef} style={{
           flex: 1, minWidth: 0,
           padding: '24px',
           overflowY: 'auto',

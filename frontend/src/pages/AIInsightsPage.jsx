@@ -47,7 +47,7 @@ function AIOrb({ health = 70, listening = false }) {
         }}
       >
         <div className="scan-line" />
-        <Brain size={36} color="white" />
+        <TrendingUp size={36} color="white" />
       </motion.div>
       {/* Health arc label */}
       <div style={{
@@ -145,12 +145,12 @@ export default function AIInsightsPage() {
         <div>
           <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '2rem', fontWeight: 900, marginBottom: 4, display: 'flex', alignItems: 'center', gap: 12 }}>
             <div style={{ width: 42, height: 42, borderRadius: 12, background: 'linear-gradient(135deg, #6366f1, #a855f7)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 20px rgba(168,85,247,0.5)' }}>
-              <Brain size={22} color="white" />
+              <TrendingUp size={22} color="white" />
             </div>
-            <span className="gradient-text">AI Command Center</span>
+            <span className="gradient-text">Performance & Insights</span>
           </h1>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginLeft: 54 }}>
-            <p style={{ color: 'var(--text-secondary)', fontSize: 14 }}>Real-time intelligence · Updates every 30s</p>
+            <p style={{ color: 'var(--text-secondary)', fontSize: 14 }}>Real-time analytics · Updates every 30s</p>
             {refreshing && <span className="live-badge">Analyzing...</span>}
           </div>
         </div>
@@ -205,7 +205,7 @@ export default function AIInsightsPage() {
               </div>
             </div>
             <div style={{ padding: '12px 24px', borderRadius: 14, background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border-sm)', textAlign: 'center', minWidth: 180 }}>
-              <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 4, fontFamily: 'var(--font-mono)', textTransform: 'uppercase', letterSpacing: 0.8 }}>AI Prediction</div>
+              <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 4, fontFamily: 'var(--font-mono)', textTransform: 'uppercase', letterSpacing: 0.8 }}>Project Forecast</div>
               <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)' }}>{predictedCompletion || '—'}</div>
             </div>
           </div>
@@ -238,9 +238,9 @@ export default function AIInsightsPage() {
         {/* Smart Insights */}
         <div className="glass-hud" style={{ padding: 24 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 18 }}>
-            <Brain size={16} color="var(--violet)" style={{ filter: 'drop-shadow(0 0 6px rgba(168,85,247,0.6))' }} />
+            <Activity size={16} color="var(--violet)" style={{ filter: 'drop-shadow(0 0 6px rgba(168,85,247,0.6))' }} />
             <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 15, color: 'var(--text-primary)' }}>
-              AI Smart Insights ({otherInsights.length})
+              Performance Insights ({otherInsights.length})
             </h3>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10, maxHeight: 340, overflowY: 'auto' }}>
@@ -336,7 +336,7 @@ export default function AIInsightsPage() {
         <div className="glass-hud" style={{ padding: 24 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 18 }}>
             <Target size={16} color="var(--amber)" />
-            <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 15, color: 'var(--text-primary)' }}>AI Role Allocation</h3>
+            <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 15, color: 'var(--text-primary)' }}>Role Allocations</h3>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2,1fr)', gap: 12 }}>
             {members.slice(0, 6).map((m, i) => {
@@ -355,16 +355,16 @@ export default function AIInsightsPage() {
         </div>
       </div>
 
-      {/* ── AI Meeting Notes ── */}
+      {/* ── Sprint Summaries ── */}
       {meetingNotes && (
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
           className="card-mission hud-corner-cyan" style={{ padding: 28, marginBottom: 20 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
-            <span style={{ fontSize: 22 }}>🤖</span>
+            <span style={{ fontSize: 22 }}>📝</span>
             <div>
-              <div className="section-label" style={{ marginBottom: 1 }}>Auto-generated</div>
+              <div className="section-label" style={{ marginBottom: 1 }}>Generated summary</div>
               <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 15, color: 'var(--text-primary)' }}>
-                AI Meeting Notes
+                Sprint Summaries
                 <span style={{ fontSize: 11, color: 'var(--text-muted)', marginLeft: 10, fontWeight: 400, fontFamily: 'var(--font-mono)' }}>
                   {new Date(meetingNotes.generated_at).toLocaleTimeString()}
                 </span>

@@ -125,4 +125,27 @@ exports.getAuditLogs = async (req, res) => {
   }
 };
 
+exports.getNotifications = async (req, res) => {
+  try {
+    const notifs = await query(
+      'SELECT * FROM Notifications WHERE user_id = ? ORDER BY created_at DESC LIMIT 50',
+      [req.user.id]
+    );
+    const [unread] = await query(
+      'SELECT COUNT(*) as c FROM Notifications WHERE user_id = ? AND is_read = 0',
+      [req.user.id]
+    );
+    res.json({ notifications: notifs, unread_count: unread?.c || 0 });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
 
+exports.markNotificationsRead = async (req, res) => {
+  try {
+    await query('UPDATE Notifications SET is_read = 1 WHERE user_id = ? AND is_read = 0', [req.user.id]);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
