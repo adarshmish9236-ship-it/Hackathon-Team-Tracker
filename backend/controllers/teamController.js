@@ -1,8 +1,10 @@
 // controllers/teamController.js — SQLite compatible
 const { query } = require('../utils/db');
 const bcrypt = require('bcryptjs');
+const { ensureTeamDummyData } = require('./analyticsController');
 
 const generateCode = () => Math.random().toString(36).substring(2, 10).toUpperCase();
+
 
 exports.createTeam = async (req, res) => {
   try {
@@ -78,6 +80,7 @@ exports.joinTeam = async (req, res) => {
 exports.getTeam = async (req, res) => {
   try {
     const { id } = req.params;
+    await ensureTeamDummyData(id);
     const [team] = await query('SELECT * FROM Teams WHERE id=?', [id]);
     if (!team) return res.status(404).json({ error: 'Team not found' });
     const members = await query(
@@ -90,19 +93,35 @@ exports.getTeam = async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 };
 
+
 exports.getMyTeams = async (req, res) => {
   try {
     const teams = await query(
       `SELECT t.*,tm.role_tag,
-        (SELECT COUNT(*) FROM TeamMembers WHERE team_id=t.id AND is_active=1) AS member_count,
-        (SELECT COUNT(*) FROM Tasks WHERE team_id=t.id AND status='done') AS tasks_done,
-        (SELECT COUNT(*) FROM Tasks WHERE team_id=t.id) AS tasks_total
+        (SELECT COUNT(*) FROM TeamMembers WHERE team_id=t.id AND is_active=1) AS member_count
        FROM Teams t JOIN TeamMembers tm ON tm.team_id=t.id
        WHERE tm.user_id=? AND tm.is_active=1`,
       [req.user.id]);
+
+    for (const team of teams) {
+      await ensureTeamDummyData(team.id);
+    }
+
+    for (const team of teams) {
+      const [counts] = await query(
+        `SELECT 
+          (SELECT COUNT(*) FROM Tasks WHERE team_id=? AND status='done') AS tasks_done,
+          (SELECT COUNT(*) FROM Tasks WHERE team_id=?) AS tasks_total`,
+        [team.id, team.id]
+      );
+      team.tasks_done = counts.tasks_done || 0;
+      team.tasks_total = counts.tasks_total || 0;
+    }
+
     res.json(teams);
   } catch (err) { res.status(500).json({ error: err.message }); }
 };
+
 
 exports.updateTeam = async (req, res) => {
   try {

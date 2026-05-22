@@ -1,4 +1,4 @@
-// server.js — SyncSphere Backend Entry Point
+// server.js — SyncSphere Backend Entry Point (Updated)
 require('dotenv').config();
 const express   = require('express');
 const http      = require('http');

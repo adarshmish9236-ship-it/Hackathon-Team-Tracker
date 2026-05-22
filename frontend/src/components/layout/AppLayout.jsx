@@ -10,7 +10,7 @@ import {
   TrendingUp, Swords, User, Sun, Moon, Menu, X, Zap,
   ChevronDown, LogOut, Plus, Rocket, Shield, Target,
   Command, Search, ArrowRight, ChevronRight, Activity,
-  Bell, Settings, Hash
+  Bell, Settings, Hash, Users
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import SOSAlert from '../ui/SOSAlert';

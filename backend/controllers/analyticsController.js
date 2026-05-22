@@ -154,7 +154,32 @@ async function ensureTeamDummyData(team_id) {
       await calcProductivityInline(m.user_id, team_id);
     }
 
-    // 5. Update Team Health
+    // 5. Seed Activity Logs
+    const sampleActivities = [
+      { action: 'login', userOffset: 0, ageHours: 48, meta: {} },
+      { action: 'task_created', userOffset: 0, ageHours: 47, meta: { message: 'Setup Git Repo & CI/CD pipeline' } },
+      { action: 'task_created', userOffset: 0, ageHours: 46, meta: { message: 'Design Figma Mockups & Wireframes' } },
+      { action: 'task_created', userOffset: 0, ageHours: 45, meta: { message: 'Create Database schema & migrations' } },
+      { action: 'task_completed', userOffset: 1, ageHours: 36, meta: { message: 'Setup Git Repo & CI/CD pipeline' } },
+      { action: 'chat_sent', userOffset: 0, ageHours: 24, meta: { message: 'Hey team! I just pushed the main layout.' } },
+      { action: 'chat_sent', userOffset: 1, ageHours: 23, meta: { message: 'Awesome work, the animations are so smooth!' } },
+      { action: 'task_completed', userOffset: 2, ageHours: 22, meta: { message: 'Design Figma Mockups & Wireframes' } },
+      { action: 'task_completed', userOffset: 1, ageHours: 20, meta: { message: 'Create Database schema & migrations' } },
+      { action: 'login', userOffset: 2, ageHours: 5, meta: {} },
+      { action: 'chat_sent', userOffset: 2, ageHours: 4, meta: { message: 'Auth is working perfectly now.' } },
+    ];
+
+    for (const act of sampleActivities) {
+      const actor = members[act.userOffset % members.length];
+      const createdVal = `datetime('now', '-${act.ageHours} hours')`;
+      await query(
+        `INSERT INTO ActivityLogs (user_id, team_id, action, entity_type, meta, created_at)
+         VALUES (?, ?, ?, 'system', ?, ${createdVal})`,
+        [actor.user_id, team_id, act.action, JSON.stringify(act.meta)]
+      );
+    }
+
+    // 6. Update Team Health
     await updateTeamHealth(team_id);
 
     console.log(`✅ Success: Premium dummy data populated for team ${team_id}`);
@@ -339,3 +364,6 @@ function generateMeetingNotes(msgs, ana, members) {
     morale: msgCount > 10 ? 'High engagement' : msgCount > 3 ? 'Moderate' : 'Low activity detected',
   };
 }
+
+exports.ensureTeamDummyData = ensureTeamDummyData;
+

@@ -27,6 +27,11 @@ exports.createTask = async (req, res) => {
        VALUES (?,?,?,?,?,?,?,?,?,?)`,
       [team_id, title, description||null, priority||'medium', assigned_to||null, req.user.id,
        due_date||null, tags ? JSON.stringify(tags) : null, xp_reward||10, story_points||1]);
+    
+    // Log in ActivityLogs
+    await query('INSERT INTO ActivityLogs (user_id, team_id, action, entity_type, entity_id, meta) VALUES (?, ?, ?, ?, ?, ?)',
+      [req.user.id, team_id, 'task_created', 'Task', result.insertId, JSON.stringify({ message: title })]);
+
     const [task] = await query(
       'SELECT t.*,u.full_name AS assignee_name FROM Tasks t LEFT JOIN Users u ON u.id=t.assigned_to WHERE t.id=?',
       [result.insertId]);
@@ -43,7 +48,7 @@ exports.updateTask = async (req, res) => {
     const { id } = req.params;
     const { title, description, status, priority, assigned_to, due_date } = req.body;
     // Award XP if task is being completed
-    const [existing] = await query('SELECT status, assigned_to, xp_reward, team_id FROM Tasks WHERE id=?', [id]);
+    const [existing] = await query('SELECT status, assigned_to, xp_reward, team_id, title FROM Tasks WHERE id=?', [id]);
     if (existing && status === 'done' && existing.status !== 'done' && existing.assigned_to) {
       await query('UPDATE Users SET xp_points=xp_points+? WHERE id=?', [existing.xp_reward || 10, existing.assigned_to]);
       await query('UPDATE TeamMembers SET contribution_score=contribution_score+1 WHERE user_id=? AND team_id=?',
@@ -51,6 +56,9 @@ exports.updateTask = async (req, res) => {
       await query('INSERT INTO Notifications (user_id,team_id,type,title,body) VALUES (?,?,?,?,?)',
         [existing.assigned_to, existing.team_id, 'achievement', 'Task Completed! 🎉',
          `You earned +${existing.xp_reward || 10} XP`]);
+      // Log in ActivityLogs
+      await query('INSERT INTO ActivityLogs (user_id, team_id, action, entity_type, entity_id, meta) VALUES (?, ?, ?, ?, ?, ?)',
+        [existing.assigned_to, existing.team_id, 'task_completed', 'Task', id, JSON.stringify({ message: existing.title })]);
     }
     await query(
       'UPDATE Tasks SET title=?,description=?,status=?,priority=?,assigned_to=?,due_date=?,updated_at=CURRENT_TIMESTAMP WHERE id=?',
@@ -78,6 +86,9 @@ exports.moveTask = async (req, res) => {
       await query('UPDATE Users SET xp_points=xp_points+? WHERE id=?', [existing.xp_reward || 10, existing.assigned_to]);
       await query('UPDATE TeamMembers SET contribution_score=contribution_score+1 WHERE user_id=? AND team_id=?',
         [existing.assigned_to, existing.team_id]);
+      // Log in ActivityLogs
+      await query('INSERT INTO ActivityLogs (user_id, team_id, action, entity_type, entity_id, meta) VALUES (?, ?, ?, ?, ?, ?)',
+        [existing.assigned_to, existing.team_id, 'task_completed', 'Task', id, JSON.stringify({ message: existing.title })]);
     }
     await query('UPDATE Tasks SET status=?,updated_at=CURRENT_TIMESTAMP WHERE id=?', [status, id]);
     const [task] = await query(

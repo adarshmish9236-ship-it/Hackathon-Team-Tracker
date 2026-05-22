@@ -40,6 +40,11 @@ exports.sendMessage = async (req, res) => {
     const result = await query(
       'INSERT INTO Chats (team_id,sender_id,message,message_type,file_url,reply_to,sentiment) VALUES (?,?,?,?,?,?,?)',
       [team_id, req.user.id, message, message_type||'text', file_url||null, reply_to||null, sentiment]);
+    
+    // Log in ActivityLogs
+    await query('INSERT INTO ActivityLogs (user_id, team_id, action, entity_type, entity_id, meta) VALUES (?, ?, ?, ?, ?, ?)',
+      [req.user.id, team_id, 'chat_sent', 'Chat', result.insertId, JSON.stringify({ message })]);
+
     const [msg] = await query(
       `SELECT c.*,u.username,u.full_name,u.avatar_url FROM Chats c JOIN Users u ON u.id=c.sender_id WHERE c.id=?`,
       [result.insertId]);

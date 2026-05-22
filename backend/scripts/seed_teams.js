@@ -20,9 +20,10 @@ const run = (sql, params = []) => new Promise((resolve, reject) => {
 
 async function seed() {
   try {
-    console.log('🧹 Cleaning existing teams and team members...');
+    console.log('🧹 Cleaning existing teams, team members, and activity logs...');
     await run('DELETE FROM TeamMembers');
     await run('DELETE FROM Teams');
+    await run('DELETE FROM ActivityLogs');
 
     console.log('Starting team seeding...');
 
@@ -40,6 +41,17 @@ async function seed() {
       console.log(`Found ${userIds.length} users to distribute.`);
     }
 
+    console.log('🌱 Seeding user registration logs...');
+    for (let uIdx = 0; uIdx < userIds.length; uIdx++) {
+      const uId = userIds[uIdx];
+      const registerTime = `datetime('now', '-6 days', '+${uIdx * 15} minutes')`;
+      await run(
+        `INSERT INTO ActivityLogs (user_id, action, entity_type, meta, created_at)
+         VALUES (?, 'user_register', 'User', '{}', ${registerTime})`,
+        [uId]
+      );
+    }
+
     // 25 teams. Each team gets 1 owner (indexes 0 to 24) and 3 members (indexes 25 to 99)
     const teamNames = [
       'Nebula Coders', 'Phoenix Squad', 'Quantum Innovators', 'Cyber Sentinels', 'Byte Busters',
@@ -55,6 +67,7 @@ async function seed() {
       'EcoTech Sprint'
     ];
 
+    console.log('🌱 Seeding teams, memberships, and team activities...');
     for (let i = 0; i < 25; i++) {
       const ownerId = userIds[i]; // Pick unique owner from first 25 users
       const inviteCode = Math.random().toString(36).substring(2, 10).toUpperCase();
@@ -82,6 +95,13 @@ async function seed() {
         [teamId, ownerId, 'lead']
       );
 
+      // Log team creation in ActivityLogs
+      await run(
+        `INSERT INTO ActivityLogs (user_id, team_id, action, entity_type, meta, created_at)
+         VALUES (?, ?, 'team_created', 'Team', ?, datetime('now', '-5 days'))`,
+        [ownerId, teamId, JSON.stringify({ name: teamNames[i] })]
+      );
+
       // Add exactly 3 unique members from the userIds array starting from index 25 onwards
       for (let j = 0; j < 3; j++) {
         const memberIndex = 25 + (i * 3) + j;
@@ -94,10 +114,17 @@ async function seed() {
             'INSERT INTO TeamMembers (team_id, user_id, role_tag) VALUES (?, ?, ?)',
             [teamId, memberId, roleTag]
           );
+
+          // Log member joining in ActivityLogs
+          await run(
+            `INSERT INTO ActivityLogs (user_id, team_id, action, entity_type, meta, created_at)
+             VALUES (?, ?, 'team_joined', 'Team', ?, datetime('now', '-5 days', '+${(j + 1) * 30} minutes'))`,
+            [memberId, teamId, JSON.stringify({ role_tag: roleTag })]
+          );
         }
       }
     }
-    console.log(`✅ Success: Created 25 teams and assigned members perfectly (1 user per team, no overlaps).`);
+    console.log(`✅ Success: Created 25 teams and assigned members perfectly with full ActivityLogs (1 user per team, no overlaps).`);
   } catch (err) {
     console.error('❌ Seed error:', err);
   } finally {

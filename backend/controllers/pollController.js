@@ -26,6 +26,11 @@ exports.createPoll = async (req, res) => {
     const result = await query(
       'INSERT INTO Polls (team_id,created_by,question,options,expires_at) VALUES (?,?,?,?,?)',
       [team_id, req.user.id, question, JSON.stringify(options), expires_at||null]);
+    
+    // Log in ActivityLogs
+    await query('INSERT INTO ActivityLogs (user_id, team_id, action, entity_type, entity_id, meta) VALUES (?, ?, ?, ?, ?, ?)',
+      [req.user.id, team_id, 'poll_created', 'Poll', result.insertId, JSON.stringify({ message: question })]);
+
     res.status(201).json({ id: result.insertId, message: 'Poll created' });
   } catch (err) { res.status(500).json({ error: err.message }); }
 };
@@ -69,6 +74,11 @@ exports.triggerSOS = async (req, res) => {
     const result = await query(
       'INSERT INTO SOSAlerts (team_id,triggered_by,message,severity) VALUES (?,?,?,?)',
       [team_id, req.user.id, message||'Emergency help needed!', severity||'high']);
+    
+    // Log in ActivityLogs
+    await query('INSERT INTO ActivityLogs (user_id, team_id, action, entity_type, entity_id, meta) VALUES (?, ?, ?, ?, ?, ?)',
+      [req.user.id, team_id, 'sos_triggered', 'SOS', result.insertId, JSON.stringify({ message: message || 'Emergency help needed!' })]);
+
     // Notify all team members
     const members = await query(
       'SELECT user_id FROM TeamMembers WHERE team_id=? AND user_id!=? AND is_active=1',

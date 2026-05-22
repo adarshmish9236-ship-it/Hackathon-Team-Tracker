@@ -22,12 +22,40 @@ export default function DashboardPage() {
   const [myTasks, setMyTasks] = useState([]);
   const [fetchingTasks, setFetchingTasks] = useState(false);
 
+  // Active Team Space
+  const [activeTeamId, setActiveTeamId] = useState(null);
+  const [activeTeamData, setActiveTeamData] = useState(null);
+  const [loadingActiveTeam, setLoadingActiveTeam] = useState(false);
+
   const navigate = useNavigate();
 
   useEffect(() => {
     fetchTeams();
     fetchUserTasks();
   }, [user]);
+
+  useEffect(() => {
+    if (myTeams && myTeams.length > 0) {
+      if (!activeTeamId) {
+        setActiveTeamId(myTeams[0].id);
+      }
+    } else {
+      setActiveTeamId(null);
+      setActiveTeamData(null);
+    }
+  }, [myTeams]);
+
+  useEffect(() => {
+    if (!activeTeamId) return;
+    setLoadingActiveTeam(true);
+    teamAPI.getTeam(activeTeamId)
+      .then(r => {
+        setActiveTeamData(r.data);
+      })
+      .catch(err => console.error(err))
+      .finally(() => setLoadingActiveTeam(false));
+  }, [activeTeamId]);
+
 
   const fetchTeams = () => teamAPI.getMyTeams().then(r => setMyTeams(r.data)).catch(() => {});
 
@@ -437,7 +465,276 @@ export default function DashboardPage() {
         </motion.div>
       </div>
 
+      {/* ── My Team Workspace Section ── */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.5, duration: 0.4 }}
+        className="glass-card"
+        style={{
+          marginTop: 28,
+          padding: '28px 32px',
+          background: 'linear-gradient(135deg, rgba(6,182,212,0.06), rgba(99,102,241,0.04))',
+          position: 'relative',
+          overflow: 'hidden',
+          border: '1px solid rgba(99,102,241,0.18)',
+        }}
+      >
+        <div style={{ position: 'absolute', top: -30, right: -30, width: 180, height: 180, background: 'radial-gradient(circle, rgba(6,182,212,0.1) 0%, transparent 70%)', pointerEvents: 'none' }} />
+
+        {/* Section Header */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20, flexWrap: 'wrap', gap: 16 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div style={{ width: 36, height: 36, borderRadius: 10, background: 'linear-gradient(135deg,#06b6d4,#6366f1)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 16px rgba(6,182,212,0.3)' }}>
+              <Users size={18} color="white" />
+            </div>
+            <div>
+              <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 18, fontWeight: 800 }}>My Team Workspace</h3>
+              <p style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Live member presence, roles, velocity metrics, and command modules.</p>
+            </div>
+          </div>
+
+          {/* Team Selector if user has multiple teams */}
+          {myTeams.length > 0 && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span style={{ fontSize: 12, color: 'var(--text-muted)', fontWeight: 600 }}>SWITCH TEAM:</span>
+              <select
+                value={activeTeamId || ''}
+                onChange={e => setActiveTeamId(Number(e.target.value))}
+                className="input"
+                style={{ width: 'auto', minWidth: 180, padding: '6px 12px', fontSize: 13, backgroundColor: '#0c1220' }}
+              >
+                {myTeams.map(t => (
+                  <option key={t.id} value={t.id}>{t.name}</option>
+                ))}
+              </select>
+            </div>
+          )}
+        </div>
+
+        <div className="divider-glow" style={{ marginBottom: 20 }} />
+
+        {/* No teams fallback */}
+        {myTeams.length === 0 && (
+          <div style={{ textAlign: 'center', padding: '40px 20px', color: 'var(--text-muted)' }}>
+            <Users size={48} style={{ opacity: 0.3, marginBottom: 12, color: 'var(--cyan)' }} />
+            <h4 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>No Active Workspace Available</h4>
+            <p style={{ fontSize: 13, maxWidth: 440, margin: '0 auto 16px' }}>To unlock direct team monitoring, Kanban, chat integrations, and live collaboration, join or create a team.</p>
+            <div style={{ display: 'flex', justifyContent: 'center', gap: 12 }}>
+              <button className="btn-primary" style={{ fontSize: 12, padding: '8px 16px' }} onClick={() => navigate('/app/create-team')}>
+                Create Team 🚀
+              </button>
+              <button className="btn-ghost" style={{ fontSize: 12, padding: '8px 16px' }} onClick={() => setShowJoin(true)}>
+                Join with Invite Code
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Loading state */}
+        {myTeams.length > 0 && loadingActiveTeam && (
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
+            <div className="skeleton" style={{ height: 160, borderRadius: 'var(--r-lg)' }} />
+            <div className="skeleton" style={{ height: 160, borderRadius: 'var(--r-lg)' }} />
+          </div>
+        )}
+
+        {/* Team details loaded */}
+        {myTeams.length > 0 && !loadingActiveTeam && activeTeamData && (
+          <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 0.8fr', gap: 24, alignItems: 'start' }}>
+            
+            {/* Left: Member Directory */}
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+                <span className="live-badge" style={{ fontSize: 9 }}>COLLABORATORS</span>
+                <span style={{ fontSize: 12, color: 'var(--text-muted)', fontWeight: 600 }}>{activeTeamData.members?.length || 0} DEVELOPERS ENROLLED</span>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 12 }}>
+                {activeTeamData.members?.map(m => {
+                  const roleColors = {
+                    lead: '#ffd700',
+                    frontend: '#06b6d4',
+                    backend: '#6366f1',
+                    designer: '#ec4899',
+                    debugger: '#f59e0b',
+                    fullstack: '#8b5cf6',
+                    member: '#94a3b8'
+                  };
+                  const roleColor = roleColors[m.role_tag?.toLowerCase()] || '#94a3b8';
+                  
+                  return (
+                    <div
+                      key={m.id}
+                      style={{
+                        padding: '12px 14px',
+                        background: 'rgba(255,255,255,0.02)',
+                        border: '1px solid rgba(255,255,255,0.04)',
+                        borderRadius: 'var(--r-md)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        gap: 12,
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
+                        {/* Avatar */}
+                        <div style={{ position: 'relative', flexShrink: 0 }}>
+                          <div
+                            style={{
+                              width: 38,
+                              height: 38,
+                              borderRadius: '50%',
+                              background: 'linear-gradient(135deg, rgba(99,102,241,0.2), rgba(6,182,212,0.2))',
+                              border: `1.5px solid ${roleColor}`,
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              fontWeight: 700,
+                              fontSize: 12,
+                              color: roleColor,
+                            }}
+                          >
+                            {m.full_name?.[0]?.toUpperCase() || m.username?.[0]?.toUpperCase()}
+                          </div>
+                          {/* Live pulse for online status */}
+                          <div
+                            className={m.is_online ? 'dot-online' : 'dot-offline'}
+                            style={{
+                              position: 'absolute',
+                              bottom: 0,
+                              right: 0,
+                              width: 8,
+                              height: 8,
+                              border: '1.5px solid var(--space-surface)',
+                            }}
+                          />
+                        </div>
+
+                        <div style={{ minWidth: 0 }}>
+                          <h5 style={{ fontSize: 13, fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: 'var(--text-primary)' }}>
+                            {m.full_name}
+                          </h5>
+                          <span style={{ fontSize: 10, color: 'var(--text-secondary)' }}>@{m.username}</span>
+                        </div>
+                      </div>
+
+                      {/* Role & XP Details */}
+                      <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                        <span
+                          className={`badge`}
+                          style={{
+                            fontSize: 8,
+                            padding: '2px 8px',
+                            background: `${roleColor}12`,
+                            color: roleColor,
+                            border: `1px solid ${roleColor}25`,
+                            display: 'inline-block',
+                            marginBottom: 4,
+                          }}
+                        >
+                          {m.role_tag || 'member'}
+                        </span>
+                        <div style={{ fontSize: 10, color: 'var(--text-muted)', fontWeight: 600 }}>
+                          ⚡ {m.xp_points || 0} XP
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Right: Metrics & Shortcuts */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              {/* Sprint Analytics Panel */}
+              <div
+                style={{
+                  padding: 18,
+                  background: 'rgba(255,255,255,0.02)',
+                  border: '1px solid rgba(255,255,255,0.04)',
+                  borderRadius: 'var(--r-lg)',
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 12 }}>
+                  <TrendingUp size={14} color="var(--cyan)" />
+                  <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 0.5, color: 'var(--text-secondary)', textTransform: 'uppercase' }}>SPRINT VELOCITY STATUS</span>
+                </div>
+
+                {/* Completion Bar */}
+                <div style={{ marginBottom: 14 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: 'var(--text-secondary)', marginBottom: 5 }}>
+                    <span>Tasks Completed</span>
+                    <span style={{ color: 'var(--cyan)', fontWeight: 700 }}>
+                      {activeTeamData.analytics?.completion_pct || 0}%
+                    </span>
+                  </div>
+                  <div className="progress-bar" style={{ height: 6 }}>
+                    <div className="progress-fill" style={{ width: `${activeTeamData.analytics?.completion_pct || 0}%` }} />
+                  </div>
+                </div>
+
+                {/* Metadata details */}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, borderTop: '1px solid rgba(255,255,255,0.04)', paddingTop: 12 }}>
+                  <div>
+                    <div style={{ fontSize: 10, color: 'var(--text-muted)', fontWeight: 600 }}>HEALTH SCORE</div>
+                    <div style={{ fontSize: 16, fontWeight: 800, color: activeTeamData.team?.health_score >= 70 ? 'var(--emerald)' : activeTeamData.team?.health_score >= 40 ? 'var(--amber)' : 'var(--rose)' }}>
+                      💪 {activeTeamData.team?.health_score || 100}%
+                    </div>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: 10, color: 'var(--text-muted)', fontWeight: 600 }}>TEAM CODE</div>
+                    <div style={{ fontSize: 14, fontWeight: 800, color: 'var(--indigo-light)', fontFamily: 'var(--font-mono)', letterSpacing: 0.5 }}>
+                      🔑 {activeTeamData.team?.invite_code}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Command Modules Links */}
+              <div>
+                <span style={{ fontSize: 10, color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.8, display: 'block', marginBottom: 8 }}>COMMAND ACTIONS</span>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                  <button
+                    onClick={() => navigate(`/app/teams/${activeTeamId}/kanban`)}
+                    className="btn-ghost"
+                    style={{ fontSize: 12, padding: '8px 10px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}
+                  >
+                    📋 Kanban Board
+                  </button>
+                  <button
+                    onClick={() => navigate(`/app/teams/${activeTeamId}/chat`)}
+                    className="btn-ghost"
+                    style={{ fontSize: 12, padding: '8px 10px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}
+                  >
+                    💬 Team Chat
+                  </button>
+                  <button
+                    onClick={() => navigate(`/app/teams/${activeTeamId}/warroom`)}
+                    className="btn-ghost"
+                    style={{ fontSize: 12, padding: '8px 10px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, border: '1px solid rgba(244,63,94,0.3)', color: 'var(--rose)' }}
+                  >
+                    🆘 War Room
+                  </button>
+                  <button
+                    onClick={() => navigate(`/app/teams/${activeTeamId}/analytics`)}
+                    className="btn-ghost"
+                    style={{ fontSize: 12, padding: '8px 10px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}
+                  >
+                    📈 Analytics
+                  </button>
+                </div>
+              </div>
+
+            </div>
+
+          </div>
+        )}
+
+      </motion.div>
+
       {/* ── Join Team Modal ── */}
+
       <AnimatePresence>
         {showJoin && (
           <motion.div
