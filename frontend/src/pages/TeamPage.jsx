@@ -54,16 +54,6 @@ export default function TeamPage() {
     } catch { toast.error('Failed to update role'); }
   };
 
-  const handlePayFee = async () => {
-    try {
-      await teamAPI.payFee(teamId);
-      toast.success('Registration fee marked as Paid! 💳');
-      loadTeam();
-    } catch (err) {
-      toast.error('Failed to process fee payment');
-    }
-  };
-
   const fmtMins = (m) => {
     if (!m) return '0 hrs';
     const h = Math.floor(m/60);
@@ -146,40 +136,7 @@ export default function TeamPage() {
             <span>💪 Health: {team.health_score}%</span>
             <span>⏱️ Active Time: {fmtMins(analytics?.total_active_mins)}</span>
             {team.deadline && <span>⏰ {new Date(team.deadline).toLocaleDateString()}</span>}
-            {team.registration_fee > 0 && (
-              <span style={{ 
-                display: 'inline-flex',
-                alignItems: 'center', 
-                gap: 8, 
-                padding: '2px 8px', 
-                borderRadius: '8px', 
-                fontSize: '12px',
-                fontWeight: '600',
-                backgroundColor: team.is_fee_paid ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)',
-                color: team.is_fee_paid ? '#10b981' : '#ef4444',
-                border: `1px solid ${team.is_fee_paid ? 'rgba(16,185,129,0.15)' : 'rgba(239,68,68,0.15)'}`
-              }}>
-                💵 Fee: ${team.registration_fee} ({team.is_fee_paid ? 'Paid' : 'Unpaid'})
-                {!team.is_fee_paid && (
-                  <button 
-                    onClick={handlePayFee}
-                    style={{
-                      padding: '2px 8px',
-                      backgroundColor: 'var(--indigo)',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '6px',
-                      fontSize: '10px',
-                      fontWeight: '700',
-                      cursor: 'pointer',
-                      boxShadow: '0 1px 6px rgba(99,102,241,0.3)',
-                    }}
-                  >
-                    💳 Pay
-                  </button>
-                )}
-              </span>
-            )}
+
           </div>
         </div>
       </motion.div>

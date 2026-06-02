@@ -240,25 +240,7 @@ export default function CreateTeamPage() {
               </button>
             </Field>
           </div>
-          <div style={grid2}>
-            <Field label="Registration Fee ($)" icon={Target}>
-              <input type="number" step="0.01" min="0" className="input" value={form.registration_fee || ''} onChange={e => setForm({ ...form, registration_fee: parseFloat(e.target.value) || 0 })} placeholder="0.00 (Free)" />
-            </Field>
-            {form.registration_fee > 0 && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 24 }}>
-                <input 
-                  type="checkbox" 
-                  id="is_fee_paid"
-                  checked={form.is_fee_paid} 
-                  onChange={e => setForm({ ...form, is_fee_paid: e.target.checked })} 
-                  style={{ width: 18, height: 18, cursor: 'pointer', accentColor: 'var(--accent-blue)' }}
-                />
-                <label htmlFor="is_fee_paid" style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)', cursor: 'pointer' }}>
-                  Has this fee been paid?
-                </label>
-              </div>
-            )}
-          </div>
+
           <Field label="Project Vision / Description" icon={Target}>
             <textarea className="input" value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} placeholder="What are you building? What problem does it solve?" rows={3} style={{ resize: 'vertical' }} />
           </Field>
