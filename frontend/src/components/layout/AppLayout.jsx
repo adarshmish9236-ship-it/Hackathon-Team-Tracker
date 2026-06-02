@@ -16,6 +16,7 @@ import toast from 'react-hot-toast';
 import SOSAlert from '../ui/SOSAlert';
 import XPBurst from '../ui/XPBurst';
 import VoiceCommand from '../ui/VoiceCommand';
+import syncsphereLogo from '../../assets/syncsphere-logo.png';
 
 // ── Command Palette ────────────────────────────────────────────────
 function CommandPalette({ open, onClose, currentTeam, navigate }) {
@@ -311,19 +312,18 @@ export default function AppLayout() {
           >
             {/* Logo */}
             <div style={{ padding: '20px 16px 14px', display: 'flex', alignItems: 'center', gap: 10 }}>
-              <motion.div
-                whileHover={{ rotate: 15, scale: 1.1 }}
+              <motion.img
+                src={syncsphereLogo}
+                alt="SyncSphere Logo"
+                whileHover={{ rotate: 20, scale: 1.15 }}
                 transition={{ type: 'spring', stiffness: 400, damping: 15 }}
                 style={{
-                  width: 36, height: 36, borderRadius: 10,
-                  background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  boxShadow: '0 0 20px rgba(99,102,241,0.5)',
+                  width: 36, height: 36,
+                  objectFit: 'contain',
+                  filter: 'drop-shadow(0 0 10px rgba(6,182,212,0.6))',
                   flexShrink: 0,
                 }}
-              >
-                <Zap size={18} color="white" fill="white" />
-              </motion.div>
+              />
               <div>
                 <div style={{
                   fontFamily: 'var(--font-display)',

@@ -2,10 +2,11 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Zap, Mail, Lock, User, UserPlus, Eye, EyeOff } from 'lucide-react';
+import { Mail, Lock, User, UserPlus, Eye, EyeOff } from 'lucide-react';
 import { authAPI } from '../api/axios';
 import { useStore } from '../store/useStore';
 import toast from 'react-hot-toast';
+import syncsphereLogo from '../assets/syncsphere-logo.png';
 
 export default function RegisterPage() {
   const [form, setForm] = useState({ username:'', email:'', password:'', full_name:'' });
@@ -55,15 +56,17 @@ export default function RegisterPage() {
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }}
           style={{ position: 'relative', zIndex: 1, textAlign: 'center', maxWidth: 360 }}>
           {/* Logo */}
-          <div style={{
-            width: 72, height: 72, borderRadius: '50%',
-            background: 'linear-gradient(135deg, var(--indigo), var(--violet))',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            margin: '0 auto 24px',
-            boxShadow: '0 0 48px rgba(99,102,241,0.5), 0 0 100px rgba(99,102,241,0.15)',
-          }}>
-            <Zap size={34} color="white" />
-          </div>
+          <img
+            src={syncsphereLogo}
+            alt="SyncSphere Logo"
+            style={{
+              width: 90, height: 90,
+              objectFit: 'contain',
+              margin: '0 auto 24px',
+              display: 'block',
+              filter: 'drop-shadow(0 0 24px rgba(6,182,212,0.55)) drop-shadow(0 0 8px rgba(99,102,241,0.4))',
+            }}
+          />
 
           <h1 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 900, fontSize: 48, lineHeight: 1, marginBottom: 14 }} className="gradient-text">
             SyncSphere
@@ -108,9 +111,16 @@ export default function RegisterPage() {
           {/* Mobile logo */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 32, justifyContent: 'center' }}
             className="show-mobile">
-            <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'linear-gradient(135deg,var(--indigo),var(--violet))', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <Zap size={18} color="white" />
-            </div>
+            <img
+              src={syncsphereLogo}
+              alt="SyncSphere Logo"
+              style={{
+                width: 32, height: 32,
+                objectFit: 'contain',
+                filter: 'drop-shadow(0 0 6px rgba(6,182,212,0.5))',
+                flexShrink: 0,
+              }}
+            />
             <span style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 800, fontSize: 18 }} className="gradient-text">SyncSphere</span>
           </div>
 

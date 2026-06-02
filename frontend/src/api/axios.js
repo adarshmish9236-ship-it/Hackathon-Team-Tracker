@@ -92,6 +92,8 @@ export const adminAPI = {
   updateRole: (id, role) => api.put(`/admin/users/${id}/role`, { role }),
   deleteUser: (id) => api.delete(`/admin/users/${id}`),
   getTeams: () => api.get('/admin/teams'),
+  updateTeam: (id, data) => api.put(`/admin/teams/${id}`, data),
+  toggleFreezeTeam: (id) => api.put(`/admin/teams/${id}/freeze`),
   deleteTeam: (id) => api.delete(`/admin/teams/${id}`),
   getTelemetry: () => api.get('/admin/telemetry'),
   getThreats: () => api.get('/admin/threats'),
@@ -107,4 +109,7 @@ export const adminAPI = {
   getSubmissions: () => api.get('/admin/submissions'),
   assignJudge: (id, judge_assigned) => api.post(`/admin/submissions/${id}/assign-judge`, { judge_assigned }),
   getActivities: (params) => api.get('/admin/activities', { params }),
+  getIncidents: () => api.get('/admin/incidents'),
+  updateIncidentStatus: (id, status) => api.put(`/admin/incidents/${id}`, { status }),
+  deleteIncident: (id) => api.delete(`/admin/incidents/${id}`),
 };

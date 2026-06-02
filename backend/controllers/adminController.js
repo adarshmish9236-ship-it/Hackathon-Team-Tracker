@@ -68,6 +68,32 @@ const initTables = async () => {
         console.log('✅ Seeded Submissions table with defaults.');
       }
     }
+
+    // 3. Create IncidentLogs Table
+    await query('DROP TABLE IF EXISTS IncidentLogs');
+    await query(`
+      CREATE TABLE IF NOT EXISTS IncidentLogs (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        type TEXT NOT NULL,
+        target TEXT NOT NULL,
+        reportedBy TEXT,
+        status TEXT DEFAULT 'Pending',
+        time TEXT,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    // Seed IncidentLogs if empty
+    const incCount = await query('SELECT COUNT(*) as c FROM IncidentLogs');
+    if (incCount[0].c === 0) {
+      await query(`
+        INSERT INTO IncidentLogs (type, target, reportedBy, status, time) VALUES
+        ('Spam', 'User: Eve Hacker', 'Alice Wong', 'Pending', '1 hour ago'),
+        ('Misconduct', 'Team: Null Pointers', 'System', 'Investigating', '5 hours ago'),
+        ('Inappropriate Content', 'Submission: Crypto Analyzer', 'Charlie Day', 'Resolved', '1 day ago')
+      `);
+      console.log('✅ Seeded IncidentLogs table with defaults.');
+    }
   } catch (err) {
     console.error('❌ Failed to initialize Admin Tables:', err.message);
   }
@@ -208,7 +234,7 @@ exports.broadcast = async (req, res) => {
 
 exports.notify = async (req, res) => {
   try {
-    const { target, team_id, message } = req.body;
+    const { target, team_id, user_id, message } = req.body;
     const io = req.app.get('io');
     
     if (target === 'global') {
@@ -235,9 +261,15 @@ exports.notify = async (req, res) => {
         await query(`INSERT INTO Notifications (user_id, team_id, type, title, body) VALUES ${placeholders}`, flatParams);
       }
       if (io) io.to(`team:${team_id}`).emit('new-message'); // Correct Socket.IO room syntax
+    } else if (target === 'user' && user_id) {
+      await query(
+        'INSERT INTO Notifications (user_id, team_id, type, title, body) VALUES (?, NULL, "system", "Admin Announcement", ?)',
+        [user_id, message]
+      );
+      if (io) io.emit('new-message'); // trigger UI refresh
     }
     
-    await query('INSERT INTO ActivityLogs (user_id, action, meta) VALUES (?, ?, ?)', [req.user.id, 'admin_notify', JSON.stringify({ target, team_id, message })]);
+    await query('INSERT INTO ActivityLogs (user_id, action, meta) VALUES (?, ?, ?)', [req.user.id, 'admin_notify', JSON.stringify({ target, team_id, user_id, message })]);
     
     res.json({ success: true, message: 'Notification dispatched' });
   } catch (err) {
@@ -385,3 +417,51 @@ exports.getAllActivities = async (req, res) => {
     res.json(logs);
   } catch (err) { res.status(500).json({ error: err.message }); }
 };
+
+exports.updateTeam = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, description, hackathon_name, deadline, status } = req.body;
+    await query(
+      'UPDATE Teams SET name = ?, description = ?, hackathon_name = ?, deadline = ?, status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
+      [name, description, hackathon_name, deadline, status, id]
+    );
+    res.json({ message: 'Team updated successfully by Admin' });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+};
+
+exports.toggleFreezeTeam = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const [team] = await query('SELECT status FROM Teams WHERE id = ?', [id]);
+    if (!team) return res.status(404).json({ error: 'Team not found' });
+    const newStatus = team.status === 'archived' ? 'active' : 'archived';
+    await query('UPDATE Teams SET status = ? WHERE id = ?', [newStatus, id]);
+    res.json({ message: `Team status set to ${newStatus}`, status: newStatus });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+};
+
+exports.getAllIncidents = async (req, res) => {
+  try {
+    const incidents = await query('SELECT * FROM IncidentLogs ORDER BY created_at DESC');
+    res.json(incidents);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+};
+
+exports.updateIncidentStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+    await query('UPDATE IncidentLogs SET status = ? WHERE id = ?', [status, id]);
+    res.json({ message: 'Incident status updated successfully' });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+};
+
+exports.deleteIncident = async (req, res) => {
+  try {
+    const { id } = req.params;
+    await query('DELETE FROM IncidentLogs WHERE id = ?', [id]);
+    res.json({ message: 'Incident deleted successfully' });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+};
+

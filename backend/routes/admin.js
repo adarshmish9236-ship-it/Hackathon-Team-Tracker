@@ -13,7 +13,14 @@ router.delete('/users/:id', ctrl.deleteUser);
 
 // Team Management
 router.get('/teams', ctrl.getAllTeams);
+router.put('/teams/:id', ctrl.updateTeam);
+router.put('/teams/:id/freeze', ctrl.toggleFreezeTeam);
 router.delete('/teams/:id', ctrl.deleteTeam);
+
+// Incident / Moderation Management
+router.get('/incidents', ctrl.getAllIncidents);
+router.put('/incidents/:id', ctrl.updateIncidentStatus);
+router.delete('/incidents/:id', ctrl.deleteIncident);
 
 // God-Level Telemetry & Data
 router.get('/telemetry', ctrl.getTelemetry);

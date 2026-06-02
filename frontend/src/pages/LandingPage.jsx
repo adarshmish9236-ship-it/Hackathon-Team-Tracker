@@ -2,7 +2,8 @@
 import { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Zap, Users, Kanban, BarChart3, Shield, TrendingUp, Swords, ChevronRight, ChevronDown, Activity } from 'lucide-react';
+import { Users, Kanban, BarChart3, Shield, TrendingUp, Swords, ChevronRight, ChevronDown, Activity } from 'lucide-react';
+import syncsphereLogo from '../assets/syncsphere-logo.png';
 
 const STATS = [
   { value: '10K+', label: 'Teams Tracked' },
@@ -83,14 +84,16 @@ export default function LandingPage() {
       }}>
         {/* Logo */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <div style={{
-            width: 34, height: 34, borderRadius: '50%',
-            background: 'linear-gradient(135deg, var(--indigo), var(--violet))',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            boxShadow: '0 0 18px rgba(99,102,241,0.5)',
-          }}>
-            <Zap size={18} color="white" />
-          </div>
+          <img
+            src={syncsphereLogo}
+            alt="SyncSphere Logo"
+            style={{
+              width: 36, height: 36,
+              objectFit: 'contain',
+              filter: 'drop-shadow(0 0 8px rgba(6,182,212,0.6))',
+              flexShrink: 0,
+            }}
+          />
           <span style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 800, fontSize: 17 }} className="gradient-text">
             SyncSphere
           </span>
