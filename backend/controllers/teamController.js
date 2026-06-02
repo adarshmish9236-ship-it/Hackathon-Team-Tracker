@@ -8,14 +8,14 @@ const generateCode = () => Math.random().toString(36).substring(2, 10).toUpperCa
 
 exports.createTeam = async (req, res) => {
   try {
-    const { name, description, hackathon_name, deadline, max_members, leaderDetails, members } = req.body;
+    const { name, description, hackathon_name, deadline, max_members, leaderDetails, members, registration_fee, is_fee_paid } = req.body;
     if (!name) return res.status(400).json({ error: 'Team name required' });
     const invite_code = generateCode();
     
     // Create Team
     const result = await query(
-      'INSERT INTO Teams (name,description,invite_code,hackathon_name,deadline,owner_id,max_members) VALUES (?,?,?,?,?,?,?)',
-      [name, description||null, invite_code, hackathon_name||null, deadline||null, req.user.id, max_members||10]);
+      'INSERT INTO Teams (name,description,invite_code,hackathon_name,deadline,owner_id,max_members,registration_fee,is_fee_paid) VALUES (?,?,?,?,?,?,?,?,?)',
+      [name, description||null, invite_code, hackathon_name||null, deadline||null, req.user.id, max_members||10, registration_fee||0.00, is_fee_paid||0]);
     const teamId = result.insertId;
 
     // Process Leader
@@ -128,10 +128,10 @@ exports.updateTeam = async (req, res) => {
     const { id } = req.params;
     const [team] = await query('SELECT owner_id FROM Teams WHERE id=?', [id]);
     if (!team || team.owner_id !== req.user.id) return res.status(403).json({ error: 'Not authorized' });
-    const { name, description, hackathon_name, deadline, status } = req.body;
+    const { name, description, hackathon_name, deadline, status, registration_fee, is_fee_paid } = req.body;
     await query(
-      'UPDATE Teams SET name=?,description=?,hackathon_name=?,deadline=?,status=?,updated_at=CURRENT_TIMESTAMP WHERE id=?',
-      [name, description, hackathon_name, deadline, status, id]);
+      'UPDATE Teams SET name=?,description=?,hackathon_name=?,deadline=?,status=?,registration_fee=?,is_fee_paid=?,updated_at=CURRENT_TIMESTAMP WHERE id=?',
+      [name, description, hackathon_name, deadline, status, registration_fee||0.00, is_fee_paid||0, id]);
     res.json({ message: 'Team updated' });
   } catch (err) { res.status(500).json({ error: err.message }); }
 };
@@ -151,4 +151,23 @@ exports.updateMemberRole = async (req, res) => {
     await query('UPDATE TeamMembers SET role_tag=? WHERE team_id=? AND user_id=?', [role_tag, team_id, user_id]);
     res.json({ message: 'Role updated' });
   } catch (err) { res.status(500).json({ error: err.message }); }
+};
+
+exports.payRegistrationFee = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const [team] = await query('SELECT owner_id, registration_fee FROM Teams WHERE id=?', [id]);
+    if (!team) return res.status(404).json({ error: 'Team not found' });
+    
+    await query('UPDATE Teams SET is_fee_paid = 1, updated_at = CURRENT_TIMESTAMP WHERE id = ?', [id]);
+    
+    await query(
+      'INSERT INTO ActivityLogs (user_id, team_id, action, entity_type, entity_id, meta) VALUES (?, ?, ?, ?, ?, ?)',
+      [req.user.id, id, 'fee_paid', 'Team', id, JSON.stringify({ amount: team.registration_fee })]
+    );
+
+    res.json({ message: 'Registration fee paid successfully!' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 };

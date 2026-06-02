@@ -9,6 +9,7 @@ router.post('/join',                   ctrl.joinTeam);
 router.get ('/my',                     ctrl.getMyTeams);
 router.get ('/:id',                    ctrl.getTeam);
 router.put ('/:id',                    ctrl.updateTeam);
+router.post('/:id/pay-fee',            ctrl.payRegistrationFee);
 router.get ('/:team_id/leaderboard',   ctrl.getLeaderboard);
 router.put ('/:team_id/members/:user_id/role', ctrl.updateMemberRole);
 

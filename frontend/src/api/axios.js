@@ -38,6 +38,7 @@ export const teamAPI = {
   getMyTeams:  ()         => api.get('/teams/my'),
   getTeam:     (id)       => api.get(`/teams/${id}`),
   updateTeam:  (id, d)    => api.put(`/teams/${id}`, d),
+  payFee:      (id)        => api.post(`/teams/${id}/pay-fee`),
   leaderboard: (id)       => api.get(`/teams/${id}/leaderboard`),
   setRole:     (tid,uid,role) => api.put(`/teams/${tid}/members/${uid}/role`, { role_tag: role }),
 };

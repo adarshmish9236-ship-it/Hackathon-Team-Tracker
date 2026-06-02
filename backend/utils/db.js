@@ -8,6 +8,20 @@ const dbPath = path.join(__dirname, '../syncsphere.db');
 // Ensure the db file exists or will be created
 const db = new sqlite3.Database(dbPath);
 
+// Database schema migrations for Teams registration fee
+db.serialize(() => {
+  db.run("ALTER TABLE Teams ADD COLUMN registration_fee REAL DEFAULT 0.00", (err) => {
+    if (err && !err.message.includes("duplicate column name")) {
+      console.error("Migration Error adding registration_fee:", err.message);
+    }
+  });
+  db.run("ALTER TABLE Teams ADD COLUMN is_fee_paid INTEGER DEFAULT 0", (err) => {
+    if (err && !err.message.includes("duplicate column name")) {
+      console.error("Migration Error adding is_fee_paid:", err.message);
+    }
+  });
+});
+
 const query = (sql, params = []) => {
   return new Promise((resolve, reject) => {
     // Convert MySQL "?" to SQLite "?" (they are the same)
