@@ -184,7 +184,43 @@ export default function CreateTeamPage() {
               <input className="input" value={form.hackathon_name} onChange={e => setForm({ ...form, hackathon_name: e.target.value })} placeholder="e.g. Global Hackathon 2025" />
             </Field>
             <Field label="Submission Deadline" icon={Target}>
-              <input type="datetime-local" className="input" value={form.deadline} onChange={e => setForm({ ...form, deadline: e.target.value })} />
+              <div style={{ display: 'flex', gap: 8 }}>
+                <input 
+                  type="datetime-local" 
+                  className="input" 
+                  value={form.deadline} 
+                  onChange={e => setForm({ ...form, deadline: e.target.value })} 
+                  style={{ flex: 1 }}
+                />
+                {form.deadline && (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      // Close picker by blurring input
+                      e.currentTarget.previousSibling.blur();
+                      toast.success(`Deadline confirmed: ${new Date(form.deadline).toLocaleString()}`);
+                    }}
+                    style={{
+                      padding: '0 16px',
+                      backgroundColor: 'rgba(16,185,129,0.1)',
+                      border: '1px solid rgba(16,185,129,0.3)',
+                      color: 'var(--accent-green)',
+                      borderRadius: 'var(--r-md)',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontWeight: 600,
+                      fontSize: 12,
+                      transition: 'all 0.2s',
+                    }}
+                    onMouseOver={e => e.currentTarget.style.backgroundColor = 'rgba(16,185,129,0.2)'}
+                    onMouseOut={e => e.currentTarget.style.backgroundColor = 'rgba(16,185,129,0.1)'}
+                  >
+                    OK
+                  </button>
+                )}
+              </div>
             </Field>
           </div>
           <div style={grid2}>
