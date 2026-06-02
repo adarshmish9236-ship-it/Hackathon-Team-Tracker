@@ -195,7 +195,7 @@ export default function WarRoomPage() {
               transition={{ repeat:Infinity, duration:2.5 }}
               style={{ position:'absolute', inset:-8, borderRadius:'var(--r-lg)', border:'1px solid rgba(99,102,241,0.3)', pointerEvents:'none' }}
             />
-            <div className="countdown-digit">{fmtTime(countdown)}</div>
+            <div className="countdown-digit" style={{ fontSize: '2.2rem', letterSpacing: '1px' }}>{fmtTime(countdown)}</div>
           </div>
 
           {countdown === 0 && (
