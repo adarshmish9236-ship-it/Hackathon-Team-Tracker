@@ -136,7 +136,7 @@ export default function LandingPage() {
             boxShadow: '0 0 24px rgba(99,102,241,0.15)',
             animation: 'shimmer 2.5s ease-in-out infinite',
           }}>
-            <span>🚀</span> Hackathon OS v2.0 <span style={{ opacity: 0.5 }}>•</span> <span style={{ color: 'var(--cyan-light)' }}>Now Live</span>
+            <span>⚡</span> Built to turn caffeine and late nights into podium finishes
           </div>
 
           {/* Headline */}
