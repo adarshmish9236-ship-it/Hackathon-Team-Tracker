@@ -115,6 +115,41 @@ export default function CreateTeamPage() {
 
   const [members, setMembers] = useState([]);
 
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [tempDate, setTempDate] = useState('');
+  const [tempTime, setTempTime] = useState('');
+
+  const openDatePicker = () => {
+    if (form.deadline) {
+      const d = new Date(form.deadline);
+      const yyyy = d.getFullYear();
+      const mm = String(d.getMonth() + 1).padStart(2, '0');
+      const dd = String(d.getDate()).padStart(2, '0');
+      const hh = String(d.getHours()).padStart(2, '0');
+      const min = String(d.getMinutes()).padStart(2, '0');
+      setTempDate(`${yyyy}-${mm}-${dd}`);
+      setTempTime(`${hh}:${min}`);
+    } else {
+      const d = new Date();
+      const yyyy = d.getFullYear();
+      const mm = String(d.getMonth() + 1).padStart(2, '0');
+      const dd = String(d.getDate()).padStart(2, '0');
+      setTempDate(`${yyyy}-${mm}-${dd}`);
+      setTempTime('23:59');
+    }
+    setShowDatePicker(true);
+  };
+
+  const confirmDatePicker = () => {
+    if (!tempDate || !tempTime) {
+      return toast.error('Please select both date and time');
+    }
+    const combined = `${tempDate}T${tempTime}`;
+    setForm(prev => ({ ...prev, deadline: combined }));
+    setShowDatePicker(false);
+    toast.success(`Deadline set: ${new Date(combined).toLocaleString()}`);
+  };
+
   const addMember = () => setMembers(prev => [...prev, emptyMember()]);
   const removeMember = id => setMembers(prev => prev.filter(m => m.id !== id));
   const updateMember = (id, field, val) =>
@@ -184,43 +219,25 @@ export default function CreateTeamPage() {
               <input className="input" value={form.hackathon_name} onChange={e => setForm({ ...form, hackathon_name: e.target.value })} placeholder="e.g. Global Hackathon 2025" />
             </Field>
             <Field label="Submission Deadline" icon={Target}>
-              <div style={{ display: 'flex', gap: 8 }}>
-                <input 
-                  type="datetime-local" 
-                  className="input" 
-                  value={form.deadline} 
-                  onChange={e => setForm({ ...form, deadline: e.target.value })} 
-                  style={{ flex: 1 }}
-                />
-                {form.deadline && (
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      // Close picker by blurring input
-                      e.currentTarget.previousSibling.blur();
-                      toast.success(`Deadline confirmed: ${new Date(form.deadline).toLocaleString()}`);
-                    }}
-                    style={{
-                      padding: '0 16px',
-                      backgroundColor: 'rgba(16,185,129,0.1)',
-                      border: '1px solid rgba(16,185,129,0.3)',
-                      color: 'var(--accent-green)',
-                      borderRadius: 'var(--r-md)',
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontWeight: 600,
-                      fontSize: 12,
-                      transition: 'all 0.2s',
-                    }}
-                    onMouseOver={e => e.currentTarget.style.backgroundColor = 'rgba(16,185,129,0.2)'}
-                    onMouseOut={e => e.currentTarget.style.backgroundColor = 'rgba(16,185,129,0.1)'}
-                  >
-                    OK
-                  </button>
-                )}
-              </div>
+              <button
+                type="button"
+                onClick={openDatePicker}
+                className="input"
+                style={{
+                  textAlign: 'left',
+                  cursor: 'pointer',
+                  background: 'rgba(255,255,255,0.03)',
+                  border: '1px solid var(--border-sm)',
+                  color: form.deadline ? 'var(--text-primary)' : 'var(--text-muted)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '11px 16px',
+                }}
+              >
+                <span>{form.deadline ? new Date(form.deadline).toLocaleString() : 'Set Date & Time'}</span>
+                <span style={{ fontSize: 11, color: 'var(--accent-blue)', fontWeight: 600 }}>Modify</span>
+              </button>
             </Field>
           </div>
           <div style={grid2}>
@@ -447,6 +464,90 @@ export default function CreateTeamPage() {
           {step === 3 && Step3}
         </AnimatePresence>
       </form>
+
+      {/* Date Picker Custom Popup */}
+      <AnimatePresence>
+        {showDatePicker && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            style={{
+              position: 'fixed',
+              inset: 0,
+              background: 'rgba(0,0,0,0.85)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              zIndex: 600,
+              backdropFilter: 'blur(10px)',
+            }}
+            onClick={(e) => e.target === e.currentTarget && setShowDatePicker(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0, y: 15 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 15 }}
+              transition={{ type: 'spring', damping: 24, stiffness: 350 }}
+              className="glass-card"
+              style={{
+                width: '100%',
+                maxWidth: 400,
+                padding: 30,
+                border: '1px solid rgba(99,102,241,0.25)',
+                boxShadow: '0 10px 40px rgba(0,0,0,0.5)',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 20,
+              }}
+            >
+              <h3 style={{ margin: 0, fontSize: 18, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 8 }}>
+                📅 Select Deadline
+              </h3>
+              
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                  <label style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)' }}>DATE</label>
+                  <input
+                    type="date"
+                    className="input"
+                    value={tempDate}
+                    onChange={(e) => setTempDate(e.target.value)}
+                  />
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                  <label style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)' }}>TIME</label>
+                  <input
+                    type="time"
+                    className="input"
+                    value={tempTime}
+                    onChange={(e) => setTempTime(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', gap: 12, marginTop: 10 }}>
+                <button
+                  type="button"
+                  className="btn-ghost"
+                  style={{ flex: 1 }}
+                  onClick={() => setShowDatePicker(false)}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  className="btn-primary"
+                  style={{ flex: 1, justifyContent: 'center' }}
+                  onClick={confirmDatePicker}
+                >
+                  OK
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
